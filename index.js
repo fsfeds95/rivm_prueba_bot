@@ -1,6 +1,9 @@
 // index.js
 const { Telegraf } = require('telegraf')
-const fetch = require('node-fetch')
+import fetch from 'node-fetch';
+
+// rest of the code
+
 
 const API_KEY = '74dc824830c7f93dc61b03e324070886'
 
