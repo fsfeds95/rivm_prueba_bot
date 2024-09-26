@@ -3,7 +3,7 @@ const express = require('express');
 // Crea una aplicación en Express
 const app = express();
 const port = 8225;
-// Importar las dependencias necesarias
+
 // Importar las dependencias necesarias
 const { Telegraf } = require('telegraf');
 const request = require('request');
@@ -27,18 +27,18 @@ const LANG_EN = 'language=en-US';
 
 const bot = new Telegraf(BOT_TOKEN);
 
-bot.on('inline_query', (ctx) => {
+bot.on('inline_query', async (ctx) => {
  const query = ctx.inlineQuery.query;
  const url = `${BASE_URL}/search/movie?${API_KEY}&${LANG_ES}&query=${encodeURIComponent(query)}`;
 
- request(url, (error, response, body) => {
+ request(url, async (error, response, body) => {
   if (error) {
    console.log('Ay, mi amor, algo salió mal:', error);
    return;
   }
 
   const results = JSON.parse(body).results;
-  const resultsList = results.map(movie => {
+  const resultsList = await Promise.all(results.map(async movie => {
    const id = movie.id;
    const title = movie.title;
    const initial = movie.title.substring(1, 0);
@@ -51,8 +51,8 @@ bot.on('inline_query', (ctx) => {
 
    const langComplete = getLanguage(langCode);
    const genreEs = getGenres(genre);
-   const durationTime = getDurationMovie(id);
-   const actors = getActorsMovie(id);
+   const durationTime = await getDurationMovie(id);
+   const actors = await getActorsMovie(id);
 
    return {
     type: 'article',
@@ -64,7 +64,7 @@ bot.on('inline_query', (ctx) => {
     thumb_url: IMG_92 + posterPath,
     description: `${originalTitle}\n1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-25-26-27-28-29-30`,
    };
-  });
+  }));
 
   ctx.answerInlineQuery(resultsList);
  });
@@ -89,7 +89,7 @@ function getLanguage(languageCode) {
 }
 
 // Función: Obtener la duración de la película.
-function getDurationMovie(id) {
+async function getDurationMovie(id) {
  return new Promise((resolve, reject) => {
   request(`${BASE_URL}/movie/${id}?${API_KEY}&${LANG_ES}`, (error, response, body) => {
    if (error) {
@@ -141,7 +141,7 @@ function getGenres(genreIds) {
 }
 
 // Función: Obtener actores.
-function getActorsMovie(id) {
+async function getActorsMovie(id) {
  return new Promise((resolve, reject) => {
   request(`${BASE_URL}/movie/${id}/credits?${API_KEY}&${LANG_ES}`, (error, response, body) => {
    if (error) {
@@ -154,6 +154,7 @@ function getActorsMovie(id) {
   });
  });
 }
+
 
 bot.launch();
 
