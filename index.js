@@ -6,7 +6,6 @@ const port = 8225;
 
 // Importar las dependencias necesarias
 const { Telegraf } = require('telegraf');
-// Importar las bibliotecas requeridas
 const jimp = require('jimp-compact');
 const request = require('request');
 
@@ -32,8 +31,6 @@ const bot = new Telegraf(BOT_TOKEN);
 // Array para almacenar los IDs de los usuarios
 const userIds = [];
 
-
-
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
 //                        COMANDOS                       \\
 
@@ -46,29 +43,33 @@ bot.start((ctx) => {
  console.log(`"Nombre: ${firstName}, Usuario: ${username}, con el id: ${userId} uso : /start"`);
 
  if (!userIds.includes(userId)) {
-  // Agregar el ID si no está ya en el array
   userIds.push(userId);
  }
 
  ctx.reply(`¡Hola ${firstName} bienvenido, este es tu usuario ${username}!`);
 });
 
-
 // Comando para buscar backdrops
 bot.command('backdrop', (ctx) => {
  const idMovie = ctx.message.text.split(' ')[1]; // Obtiene el ID de la película del mensaje
+ if (!idMovie) {
+  ctx.reply('Por favor, proporciona un ID de película válido.');
+  return;
+ }
+
  const url = `${BASE_URL}/movie/${idMovie}/images?${API_KEY}`;
 
  request(url, (error, response, body) => {
-  if (error) {
+  if (error || response.statusCode !== 200) {
    console.log('Ay, mi amor, algo salió mal:', error);
    ctx.reply('Ocurrió un error al buscar los backdrops. Intenta de nuevo más tarde.');
    return;
   }
 
-  const backdrops = JSON.parse(body).backdrops;
+  const data = JSON.parse(body);
+  const backdrops = data.backdrops;
 
-  if (backdrops.length === 0) {
+  if (!backdrops || backdrops.length === 0) {
    ctx.reply('Lo siento, no se encontraron backdrops para esta película.');
    return;
   }
@@ -79,7 +80,6 @@ bot.command('backdrop', (ctx) => {
   });
  });
 });
-
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
 //                        EVENTOS                        \\
@@ -103,7 +103,6 @@ bot.launch();
 
 // Ruta "/keep-alive"
 app.get('/keep-alive', (req, res) => {
- // Enviar una respuesta vacía
  res.send('');
 });
 
@@ -123,5 +122,4 @@ app.listen(port, () => {
     console.error('Error en la solicitud de keep-alive:', error);
    });
  }, 5 * 60 * 1000);
- // 30 minutos * 60 segundos * 1000 milisegundos
 });
