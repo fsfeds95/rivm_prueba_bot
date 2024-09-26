@@ -39,7 +39,7 @@ bot.on('inline_query', (ctx) => {
 
   const results = JSON.parse(body).results;
   const resultsList = results.map(movie => {
-   const idMovie = movie.id;
+   const id = movie.id;
    const title = movie.title;
    const initial = movie.title.substring(1, 0);
    const originalTitle = movie.original_title;
@@ -50,19 +50,19 @@ bot.on('inline_query', (ctx) => {
    const genre = movie.genre_ids;
 
    const langComplete = getLanguage(langCode);
-   const durationTime = getDurationMovie(idMovie);
    const genreEs = getGenres(genre);
-   const actors = getActorsMovie(idMovie);
+   const durationTime = getDurationMovie(id);
+   const actors = getActorsMovie(id);
 
    return {
     type: 'article',
-    id: idMovie,
+    id: id,
     title: `${title} (${releaseYear})`,
     input_message_content: {
      message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬`
     },
     thumb_url: IMG_92 + posterPath,
-    description: `${originalTitle}`,
+    description: `${originalTitle}\n1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-25-26-27-28-29-30`,
    };
   });
 
@@ -89,9 +89,9 @@ function getLanguage(languageCode) {
 }
 
 // Función: Obtener la duración de la película.
-function getDurationMovie(movieId) {
+function getDurationMovie(id) {
  return new Promise((resolve, reject) => {
-  request(`${BASE_URL}/movie/${movieId}?${API_KEY}&${LANG_ES}`, (error, response, body) => {
+  request(`${BASE_URL}/movie/${id}?${API_KEY}&${LANG_ES}`, (error, response, body) => {
    if (error) {
     console.log(error);
     reject(error);
@@ -141,9 +141,9 @@ function getGenres(genreIds) {
 }
 
 // Función: Obtener actores.
-function getActorsMovie(movieId) {
+function getActorsMovie(id) {
  return new Promise((resolve, reject) => {
-  request(`${BASE_URL}/movie/${movieId}/credits?${API_KEY}&${LANG_ES}`, (error, response, body) => {
+  request(`${BASE_URL}/movie/${id}/credits?${API_KEY}&${LANG_ES}`, (error, response, body) => {
    if (error) {
     console.log('Ay, mi amor, algo salió mal:', error);
     reject(error);
