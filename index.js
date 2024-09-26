@@ -1,9 +1,11 @@
-// index.js
+// Importar las bibliotecas requeridas
+const express = require('express');
+// Crea una aplicación en Express
+const app = express();
+const port = 8225;
+// Importar la biblioteca telegraf
 const { Telegraf } = require('telegraf')
 import fetch from 'node-fetch';
-
-// rest of the code
-
 
 const API_KEY = '74dc824830c7f93dc61b03e324070886'
 
@@ -47,4 +49,31 @@ Sinopsis: ${details.overview}
  })
 })
 
-bot.launch()
+bot.launch();
+
+//=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
+
+// Ruta "/keep-alive"
+app.get('/keep-alive', (req, res) => {
+ // Enviar una respuesta vacía
+ res.send('');
+});
+
+// Iniciar el servidor en el puerto 8225
+app.listen(port, () => {
+ console.log(`Servidor iniciado en http://localhost:${port}`);
+
+ // Código del cliente para mantener la conexión activa
+ setInterval(() => {
+  fetch(`http://localhost:${port}/keep-alive`)
+   .then(response => {
+    const currentDate = new Date().toLocaleString("es-VE", { timeZone: "America/Caracas" });
+    const formattedTime = currentDate;
+    console.log(`Sigo vivo 🎉 (${formattedTime})`);
+   })
+   .catch(error => {
+    console.error('Error en la solicitud de keep-alive:', error);
+   });
+ }, 5 * 60 * 1000);
+ // 30 minutos * 60 segundos * 1000 milisegundos
+});
