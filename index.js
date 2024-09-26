@@ -8,7 +8,7 @@ const port = 8225;
 const { Telegraf } = require('telegraf');
 // Importar las bibliotecas requeridas
 const jimp = require('jimp-compact');
-const request = require('request');
+const request = require('request'); de
 
 const BOT_TOKEN = '8180114783:AAHQuvWCUFo98JjMK5NeAX_AQkawBy7xHec';
 
