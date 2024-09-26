@@ -8,9 +8,9 @@ const port = 8225;
 const { Telegraf } = require('telegraf');
 // Importar las bibliotecas requeridas
 const jimp = require('jimp-compact');
-const got = require('got'); // Cambiado aquí
+const request = require('request');
 
-const BOT_TOKEN = '8180114783:AAFDX7hpkwk1jTCz9sGd42xHb3K_heT53UM';
+const BOT_TOKEN = '8180114783:AAH4fqnxhRnhGdLQ84JbWEhnYu9GNJ-wmLs';
 
 // BASE
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -31,7 +31,7 @@ const bot = new Telegraf(BOT_TOKEN);
 
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
-//                        COMANDOS                       \\
+// COMANDOS \\
 
 // Respuesta de Bienvenida al comando /start
 bot.start((ctx) => {
@@ -54,10 +54,14 @@ bot.on('inline_query', async (ctx) => {
  const query = ctx.inlineQuery.query;
  const url = `${BASE_URL}/search/movie?${API_KEY}&${LANG_ES}&query=${encodeURIComponent(query)}`;
 
- try {
-  const response = await got(url);
-  const results = JSON.parse(response.body).results;
+ request(url, async (error, response, body) => {
+  if (error) {
+   console.log('Ay, mi amor, algo salió mal:', error);
+   ctx.answerInlineQuery([{ type: 'article', id: 'error', title: 'Error', input_message_content: { message_text: 'Lo siento, ocurrió un error. Intenta de nuevo más tarde.' } }]);
+   return;
+  }
 
+  const results = JSON.parse(body).results;
   const resultsList = await Promise.all(results.map(async movie => {
    const id = movie.id;
    const title = movie.title;
@@ -82,15 +86,12 @@ bot.on('inline_query', async (ctx) => {
      message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬\n\n\nhttps://fsfeds95.github.io/introMovieClub/moreImage.html?idMovie=${id}`
     },
     thumb_url: IMG_92 + posterPath,
-    description: `${originalTitle}\n${overview.substring(0, 100)}...`, // Cambiado aquí
+    description: `${originalTitle}\n${overview.substring(0, 100)}...`, // Cambiado aquí()
    };
   }));
 
   ctx.answerInlineQuery(resultsList);
- } catch (error) {
-  console.log('Ay, mi amor, algo salió mal:', error);
-  ctx.answerInlineQuery([{ type: 'article', id: 'error', title: 'Error', input_message_content: { message_text: 'Lo siento, ocurrió un error. Intenta de nuevo más tarde.' } }]);
- }
+ });
 });
 
 
@@ -301,6 +302,7 @@ function getLanguage(languageCode) {
  return languages[languageCode] || languageCode;
 }
 
+
 // Función: Obtener la duración de la película.
 async function getDurationMovie(id) {
  return new Promise((resolve, reject) => {
@@ -317,6 +319,8 @@ async function getDurationMovie(id) {
  });
 }
 
+
+// Funcion: Traducir los generos.
 function getGenres(genreIds) {
  const genres = {
   12: "#Aventura",
@@ -389,7 +393,7 @@ app.listen(port, () => {
    .then(response => {
     const currentDate = new Date().toLocaleString("es-VE", { timeZone: "America/Caracas" });
     const formattedTime = currentDate;
-    console.log(`Sigo vivo 🎉 (${formattedTime})`);
+    console.log(`ta'mos vivo 🎉 (${formattedTime})`);
    })
    .catch(error => {
     console.error('Error en la solicitud de tamosVivos:', error);
