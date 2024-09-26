@@ -62,7 +62,7 @@ bot.on('inline_query', async (ctx) => {
      message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬`
     },
     thumb_url: IMG_92 + posterPath,
-    description: `${originalTitle}\n1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-25-26-27-28-29-30`,
+    description: `${originalTitle}\n${overview.substring(48, 0)}...`,
    };
   }));
 
@@ -106,25 +106,24 @@ async function getDurationMovie(id) {
 
 function getGenres(genreIds) {
  const genres = {
-  28: "#Accion",
   12: "#Aventura",
+  14: "#Fantasia",
   16: "#Animacion",
+  18: "#Drama",
+  27: "#Terror",
+  28: "#Accion",
   35: "#Comedia",
+  36: "#Historia",
+  37: "#Oeste",
+  53: "#Suspenso",
   80: "#Crimen",
   99: "#Documental",
-  18: "#Drama",
-  10751: "#Familiar",
-  14: "#Fantasia",
-  36: "#Historia",
-  27: "#Terror",
-  10402: "#Musica",
-  9648: "#Misterio",
-  10749: "#Romance",
   878: "#Ciencia_Ficcion",
-  10770: "#Película_de_la_Television",
-  53: "#Suspenso",
+  9648: "#Misterio",
+  10402: "#Musica",
+  10749: "#Romance",
+  10751: "#Familiar",
   10752: "#Belica",
-  37: "#Oeste",
   10759: "#Accion_y_Aventura",
   10762: "#Infantil",
   10763: "#Noticias",
