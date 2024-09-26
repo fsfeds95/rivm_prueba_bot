@@ -150,7 +150,7 @@ async function getActorsMovie(id) {
    }
    const relevantActors = JSON.parse(body).cast.filter(actor => actor.order <= 4);
    const actorNames = relevantActors.map(actor => `#${actor.name.replace(/\s/g, '_').replace(/'/g, '').replace(/-/g, '')} (${actor.character.replace(' (voice)', '').replace(' (hiccups)', '').replace(' (uncredited)', '')})`);
-   resolve(actorNames.join("</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"));
+   resolve(actorNames.join("\n                  "));
   });
  });
 }
