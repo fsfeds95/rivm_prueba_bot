@@ -73,10 +73,30 @@ bot.command('backdrop', (ctx) => {
    return;
   }
 
-  backdrops.forEach(backdrop => {
-   const backdropUrl = IMG_ORI + backdrop.file_path; // Genera la URL de cada backdrop
-   ctx.replyWithPhoto(backdropUrl); // Envía la imagen
+  // Filtrar backdrops por idioma
+  const filteredBackdrops = backdrops.filter(backdrop => {
+   return backdrop.iso_639_1 === 'es' || backdrop.iso_639_1 === 'en' || backdrop.iso_639_1 === null;
   });
+
+  // Agrupar backdrops por idioma
+  const groupedBackdrops = filteredBackdrops.reduce((acc, backdrop) => {
+   const lang = backdrop.iso_639_1 || 'null'; // Usa 'null' si no hay idioma
+   if (!acc[lang]) acc[lang] = [];
+   if (acc[lang].length < 2) acc[lang].push(backdrop);
+   return acc;
+  }, {});
+
+  // Enviar solo dos backdrops por idioma
+  for (const lang in groupedBackdrops) {
+   groupedBackdrops[lang].forEach(backdrop => {
+    const backdropUrl = IMG_ORI + backdrop.file_path; // Genera la URL de cada backdrop
+    ctx.replyWithPhoto(backdropUrl); // Envía la imagen
+   });
+  }
+
+  if (Object.keys(groupedBackdrops).length === 0) {
+   ctx.reply('No se encontraron backdrops en los idiomas deseados.');
+  }
  });
 });
 
