@@ -3,14 +3,30 @@ const express = require('express');
 // Crea una aplicación en Express
 const app = express();
 const port = 8225;
-// Importar la biblioteca telegraf
+
+// Importar las dependencias necesarias
 const { Telegraf } = require('telegraf');
 // Importar las bibliotecas requeridas
 const jimp = require('jimp-compact');
 const request = require('request');
 
-// el API TOKEN del bot
-const BOT_TOKEN = '8180114783:AAHQuvWCUFo98JjMK5NeAX_AQkawBy7xHec';
+const BOT_TOKEN = '7224464210:AAFDVRgN1KEfkPkpVtjGbXEtS3oU96YpUu0';
+
+// BASE
+const BASE_URL = 'https://api.themoviedb.org/3';
+// API key TMDB
+const API_KEY = 'api_key=74dc824830c7f93dc61b03e324070886';
+
+// Resolución de imagenes
+const IMG_ORI = 'https://image.tmdb.org/t/p/original';
+const IMG_500 = 'https://image.tmdb.org/t/p/w500';
+const IMG_300 = 'https://image.tmdb.org/t/p/w300';
+const IMG_185 = 'https://image.tmdb.org/t/p/w185';
+const IMG_92 = 'https://image.tmdb.org/t/p/w92';
+// Lenguajes
+const LANG_ES = 'language=es-MX';
+const LANG_EN = 'language=en-US';
+
 const bot = new Telegraf(BOT_TOKEN);
 
 // Array para almacenar los IDs de los usuarios
