@@ -38,22 +38,26 @@ bot.on('inline_query', async (ctx) => {
 
     const idMovie = movie.id;
     const title = movie.title;
+    const initial = movie.title.substring(1, 0);
     const originalTitle = movie.original_title;
     const releaseYear = movie.release_date.split("-")[0];
     const posterPath = movie.poster_path;
     const langCode = movie.original_language;
     const overview = movie.overview;
+    const genre = movie.genre_ids;
+
+
+    const langComplete = await getLanguage(langCode);
+    const durationTime = await getDurationMovie(id);
+    const genreEs = await getGenres(genre);
+    const actors = await getActorsMovie(id);
 
     return {
      type: 'article',
      id: idMovie,
      title: `${title} (${releaseYear})`,
      input_message_content: {
-      message_text: `
-      ${title} (${releaseYear})\n
-      ${originalTitle}\n
-      ${langCode}\n
-      ${overview}`
+      message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬`
      },
      thumb_url: IMG_92 + posterPath,
      description: `${originalTitle}`,
@@ -64,10 +68,103 @@ bot.on('inline_query', async (ctx) => {
  });
 });
 
+// Funcion: Traducir el lenguaje.
+async function getLanguage(languageCode) {
+ const languages = {
+  en: "🇺🇸 #Ingles",
+  ca: "🇪🇸 #Catalan",
+  fr: "🇫🇷 #Frances",
+  de: "🇩🇪 #Aleman",
+  it: "🇮🇹 #Italiano",
+  ja: "🇯🇵 #Japones",
+  ru: "🇷🇺 #Ruso",
+  zh: "🇨🇳 #Chino",
+  pl: "🇵🇱 #Polaco",
+  ko: "🇰🇷 / 🇰🇵 #Coreano",
+  es: "🇲🇽 / 🇪🇸 #Español",
+ };
+ return languages[languageCode] || languageCode;
+}
+
+// Funcion: Obtener la duración de la película.
+async function getDurationMovie(movieId) {
+ try {
+  const response = await $.ajax({
+   url: `${BASE_URL}/movie/${movieId}?${API_KEY}&${LANG_ES}`,
+   async: false
+  });
+  const duracion = response.runtime;
+  const horas = Math.floor(duracion / 60);
+  const minutos = duracion % 60;
+  return `${horas}h ${minutos}m`;
+ } catch (error) {
+  console.log(error);
+  return "";
+ }
+}
+
+async function getGenres(genreIds) {
+ var genres = {
+  28: "#Accion",
+  12: "#Aventura",
+  16: "#Animacion",
+  35: "#Comedia",
+  80: "#Crimen",
+  99: "#Documental",
+  18: "#Drama",
+  10751: "#Familiar",
+  14: "#Fantasia",
+  36: "#Historia",
+  27: "#Terror",
+  10402: "#Musica",
+  9648: "#Misterio",
+  10749: "#Romance",
+  878: "#Ciencia_Ficcion",
+  10770: "#Película_de_la_Television",
+  53: "#Suspenso",
+  10752: "#Belica",
+  37: "#Oeste",
+  10759: "#Accion_y_Aventura",
+  10762: "#Infantil",
+  10763: "#Noticias",
+  10764: "#Realidad",
+  10765: "#Ciencia_Ficcion_y_Fantasia",
+  10766: "#Serial",
+  10767: "#Conversacion",
+  10768: "#Politico",
+  10769: "#Opcion_Interactiva"
+ };
+
+ var genreList = [];
+
+ genreIds.forEach(function(genreId) {
+  if (genres[genreId]) {
+   genreList.push(genres[genreId]);
+  }
+ });
+
+ return genreList.join(" ");
+}
+
+
+// Funcion: Obtener actores.
+async function getActorsMovie(movieId) {
+ try {
+  const response = await $.ajax({
+   url: `${BASE_URL}/movie/${movieId}/credits?${API_KEY}&${LANG_ES}`,
+   async: false
+  });
+  const relevantActors = response.cast.filter(actor => actor.order <= 4);
+  const actorNames = relevantActors.map(actor => `#${actor.name.replace(/\s/g, '_').replace(/'/g, '').replace(/-/g, '')} (${actor.character.replace(' (voice)', '').replace(' (hiccups)', '').replace(' (uncredited)', '')})`);
+  return actorNames.join("</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+ } catch (error) {
+  console.log('Ay, mi amor, algo salió mal:', error);
+  return "";
+ }
+}
+
+
 bot.launch();
-
-
-
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
 
