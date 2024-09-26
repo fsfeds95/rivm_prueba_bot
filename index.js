@@ -9,7 +9,7 @@ const request = require('request');
 
 // Definir la API key de TheMovieDB y el token del bot
 const API_KEY = '74dc824830c7f93dc61b03e324070886';
-const BOT_TOKEN = '7299943772:AAFxjPMsL27ORMkCaOGF_H4aSyE5SosEIFE';
+const BOT_TOKEN = '8180114783:AAFrGu06UhD3DH0wM6VYDupf177JBKz9uHI';
 
 // Crear el bot
 const bot = new Telegraf(BOT_TOKEN);
