@@ -24,12 +24,18 @@ bot.on('inline_query', async (ctx) => {
    const inlineResults = results.map(movie => ({
     type: 'article',
     id: movie.id,
-    title: movie.title,
+    title: `${movie.title} (${movie.release_date.split('-')[0]})`,
     input_message_content: {
-     message_text: `![Backdrop](${movie.backdrop_path ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` : ''})\n**${movie.title} (${movie.release_date.split('-')[0]})**\n**Título original:** ${movie.original_title}\n**Idioma original:** ${movie.original_language}\n**Géneros:** ${movie.genre_ids.join(', ')}\n**Sinopsis:** ${movie.overview}`,
+     message_text: `
+     <b>${movie.title} (${movie.release_date.split('-')[0]})</b></br>
+     <i>Título original:</i> ${movie.original_title}</br>
+     <i>Idioma original:</i> ${movie.original_language}</br>
+     <i>Géneros:</i> ${movie.genre_ids.join(', ')}</br>
+     <i>Sinopsis:</i> ${movie.overview}`,
+     parse_mode: 'HTML',
     },
     thumb_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
-    description: `${movie.title} (${movie.release_date.split('-')[0]})\n${movie.original_title}`,
+    description: `${movie.original_title}\n1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-25-26-27-28-29-30`,
    }));
 
    ctx.answerInlineQuery(inlineResults);
@@ -38,6 +44,7 @@ bot.on('inline_query', async (ctx) => {
 });
 
 bot.launch();
+
 
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
