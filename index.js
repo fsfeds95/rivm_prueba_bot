@@ -4,9 +4,9 @@ const express = require('express');
 const app = express();
 const port = 8225;
 // Importar las dependencias necesarias
+// Importar las dependencias necesarias
 const { Telegraf } = require('telegraf');
 const request = require('request');
-
 
 const BOT_TOKEN = '8180114783:AAESz1YJIeFeyRjoEFe5HvHc--7Ck-EE5vg';
 
@@ -27,49 +27,51 @@ const LANG_EN = 'language=en-US';
 
 const bot = new Telegraf(BOT_TOKEN);
 
-bot.on('inline_query', async (ctx) => {
+bot.on('inline_query', (ctx) => {
  const query = ctx.inlineQuery.query;
  const url = `${BASE_URL}/search/movie?${API_KEY}&${LANG_ES}&query=${encodeURIComponent(query)}`;
 
  request(url, (error, response, body) => {
-  if (!error && response.statusCode === 200) {
-   const results = JSON.parse(body).results;
-   const resultsList = results.map(movie => {
-
-    const idMovie = movie.id;
-    const title = movie.title;
-    const initial = movie.title.substring(1, 0);
-    const originalTitle = movie.original_title;
-    const releaseYear = movie.release_date.split("-")[0];
-    const posterPath = movie.poster_path;
-    const langCode = movie.original_language;
-    const overview = movie.overview;
-    const genre = movie.genre_ids;
-
-
-    const langComplete = await getLanguage(langCode);
-    const durationTime = await getDurationMovie(id);
-    const genreEs = await getGenres(genre);
-    const actors = await getActorsMovie(id);
-
-    return {
-     type: 'article',
-     id: idMovie,
-     title: `${title} (${releaseYear})`,
-     input_message_content: {
-      message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬`
-     },
-     thumb_url: IMG_92 + posterPath,
-     description: `${originalTitle}`,
-    };
-   });
-   ctx.answerInlineQuery(resultsList);
+  if (error) {
+   console.log('Ay, mi amor, algo salió mal:', error);
+   return;
   }
+
+  const results = JSON.parse(body).results;
+  const resultsList = results.map(movie => {
+   const idMovie = movie.id;
+   const title = movie.title;
+   const initial = movie.title.substring(1, 0);
+   const originalTitle = movie.original_title;
+   const releaseYear = movie.release_date.split("-")[0];
+   const posterPath = movie.poster_path;
+   const langCode = movie.original_language;
+   const overview = movie.overview;
+   const genre = movie.genre_ids;
+
+   const langComplete = getLanguage(langCode);
+   const durationTime = getDurationMovie(idMovie);
+   const genreEs = getGenres(genre);
+   const actors = getActorsMovie(idMovie);
+
+   return {
+    type: 'article',
+    id: idMovie,
+    title: `${title} (${releaseYear})`,
+    input_message_content: {
+     message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬`
+    },
+    thumb_url: IMG_92 + posterPath,
+    description: `${originalTitle}`,
+   };
+  });
+
+  ctx.answerInlineQuery(resultsList);
  });
 });
 
-// Funcion: Traducir el lenguaje.
-async function getLanguage(languageCode) {
+// Función: Traducir el lenguaje.
+function getLanguage(languageCode) {
  const languages = {
   en: "🇺🇸 #Ingles",
   ca: "🇪🇸 #Catalan",
@@ -86,25 +88,24 @@ async function getLanguage(languageCode) {
  return languages[languageCode] || languageCode;
 }
 
-// Funcion: Obtener la duración de la película.
-async function getDurationMovie(movieId) {
- try {
-  const response = await $.ajax({
-   url: `${BASE_URL}/movie/${movieId}?${API_KEY}&${LANG_ES}`,
-   async: false
+// Función: Obtener la duración de la película.
+function getDurationMovie(movieId) {
+ return new Promise((resolve, reject) => {
+  request(`${BASE_URL}/movie/${movieId}?${API_KEY}&${LANG_ES}`, (error, response, body) => {
+   if (error) {
+    console.log(error);
+    reject(error);
+   }
+   const duracion = JSON.parse(body).runtime;
+   const horas = Math.floor(duracion / 60);
+   const minutos = duracion % 60;
+   resolve(`${horas}h ${minutos}m`);
   });
-  const duracion = response.runtime;
-  const horas = Math.floor(duracion / 60);
-  const minutos = duracion % 60;
-  return `${horas}h ${minutos}m`;
- } catch (error) {
-  console.log(error);
-  return "";
- }
+ });
 }
 
-async function getGenres(genreIds) {
- var genres = {
+function getGenres(genreIds) {
+ const genres = {
   28: "#Accion",
   12: "#Aventura",
   16: "#Animacion",
@@ -135,36 +136,27 @@ async function getGenres(genreIds) {
   10769: "#Opcion_Interactiva"
  };
 
- var genreList = [];
-
- genreIds.forEach(function(genreId) {
-  if (genres[genreId]) {
-   genreList.push(genres[genreId]);
-  }
- });
-
+ const genreList = genreIds.map(genreId => genres[genreId]).filter(Boolean);
  return genreList.join(" ");
 }
 
-
-// Funcion: Obtener actores.
-async function getActorsMovie(movieId) {
- try {
-  const response = await $.ajax({
-   url: `${BASE_URL}/movie/${movieId}/credits?${API_KEY}&${LANG_ES}`,
-   async: false
+// Función: Obtener actores.
+function getActorsMovie(movieId) {
+ return new Promise((resolve, reject) => {
+  request(`${BASE_URL}/movie/${movieId}/credits?${API_KEY}&${LANG_ES}`, (error, response, body) => {
+   if (error) {
+    console.log('Ay, mi amor, algo salió mal:', error);
+    reject(error);
+   }
+   const relevantActors = JSON.parse(body).cast.filter(actor => actor.order <= 4);
+   const actorNames = relevantActors.map(actor => `#${actor.name.replace(/\s/g, '_').replace(/'/g, '').replace(/-/g, '')} (${actor.character.replace(' (voice)', '').replace(' (hiccups)', '').replace(' (uncredited)', '')})`);
+   resolve(actorNames.join("</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"));
   });
-  const relevantActors = response.cast.filter(actor => actor.order <= 4);
-  const actorNames = relevantActors.map(actor => `#${actor.name.replace(/\s/g, '_').replace(/'/g, '').replace(/-/g, '')} (${actor.character.replace(' (voice)', '').replace(' (hiccups)', '').replace(' (uncredited)', '')})`);
-  return actorNames.join("</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
- } catch (error) {
-  console.log('Ay, mi amor, algo salió mal:', error);
-  return "";
- }
+ });
 }
 
-
 bot.launch();
+
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
 
