@@ -55,7 +55,7 @@ bot.start((ctx) => {
 
 
 // Comando para buscar backdrops
-bot.command('backdrops', (ctx) => {
+bot.command('backdrop', (ctx) => {
  const idMovie = ctx.message.text.split(' ')[1]; // Obtiene el ID de la película del mensaje
  const url = `${BASE_URL}/movie/${idMovie}/images?${API_KEY}`;
 
