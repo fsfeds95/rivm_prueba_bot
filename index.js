@@ -25,9 +25,10 @@ bot.on('inline_query', async (ctx) => {
     type: 'photo',
     id: movie.id,
     photo_url: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
-    thumb_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
     caption: `**${movie.title} (${movie.release_date.split('-')[0]})**\n**Título original:** ${movie.original_title}\n**Idioma original:** ${movie.original_language}\n**Géneros:** ${movie.genre_ids.join(', ')}\n**Sinopsis:** ${movie.overview}`,
     parse_mode: 'Markdown',
+    thumb_url: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
+    description: `${movie.title} (${movie.release_date.split('-')[0]})\n${movie.original_title}`,
    }));
 
    ctx.answerInlineQuery(inlineResults);
