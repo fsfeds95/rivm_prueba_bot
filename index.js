@@ -75,10 +75,11 @@ bot.command('id', (ctx) => {
 
   let message = 'Resultados encontrados:\n';
   data.results.forEach(movie => {
-   const title = movie.title; // Título de la película
-   const releaseDate = movie.release_date; // Año de estreno
-   const movieId = movie.id; // ID de la película
-   message += `Título: ${title} (${releaseDate})\nID: ${movieId}\n▬▬▬▬▬▬▬▬▬\n`;
+   const movieId = movie.id;
+   const title = movie.title;
+   const releaseDate = movie.release_date.split("-")[0];
+   
+   message += `Título: ${title} (${releaseDate})\nID: ${movieId}\n▬▬▬▬▬▬▬▬▬\n\n`;
   });
 
   ctx.reply(message);
