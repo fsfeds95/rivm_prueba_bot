@@ -3,58 +3,57 @@ const express = require('express');
 // Crea una aplicación en Express
 const app = express();
 const port = 8225;
-// Importar la biblioteca telegraf
-const { Telegraf } = require('telegraf')
-import fetch from 'node-fetch';
+// Importar las dependencias necesarias
+const Telegraf = require('telegraf');
+const request = require('request');
 
-const API_KEY = '74dc824830c7f93dc61b03e324070886'
+// Definir la API key de TheMovieDB y el token del bot
+const API_KEY = '74dc824830c7f93dc61b03e324070886';
+const BOT_TOKEN = '7299943772:AAFxjPMsL27ORMkCaOGF_H4aSyE5SosEIFE';
 
-const BOT_TOKEN = '8180114783:AAFrGu06UhD3DH0wM6VYDupf177JBKz9uHI'
+// Crear el bot
+const bot = new Telegraf(BOT_TOKEN);
 
-// Bot initialization
-const bot = new Telegraf(BOT_TOKEN)
+// Comando para buscar películas
+bot.command('pelicula', (ctx) => {
+ const query = ctx.message.text.split(' ')[1]; // Obtener la película a buscar
 
-bot.command('pelicula', async ctx => {
- const query = ctx.message.text.split('/pelicula ')[1]
+ // Hacer la solicitud a TheMovieDB
+ request(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`, (error, response, body) => {
+  if (!error && response.statusCode == 200) {
+   const data = JSON.parse(body);
 
- // Search movie
- const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`)
- const data = await response.json()
+   // Enviar lista de resultados al usuario
+   data.results.forEach((result, index) => {
+    ctx.reply(`${index + 1}. ${result.title} (${result.release_date.split('-')[0]})`);
+   });
 
- // Send list of results
- const movies = data.results
- ctx.replyWithHTML(`Lista de películas encontradas para "${query}":`,
-  movies.map(movie => {
-   return `
-<b>${movie.title} (${movie.release_date})</b>
-`
-  }).join('\n')
- )
+   // Manejar la selección del usuario
+   bot.hears(/^\d+$/, (ctx) => {
+    const selectedMovie = data.results[parseInt(ctx.message.text) - 1];
 
- // Handle click on result
- bot.action('movie', async ctx => {
-  const id = ctx.match[1]
+    // Enviar detalles de la película seleccionada
+    ctx.reply(`
+     🎬 ${selectedMovie.title} (${selectedMovie.release_date.split('-')[0]})
+     🌟 ${selectedMovie.original_title}
+     🗣️ ${selectedMovie.original_language}
+     🎭 ${selectedMovie.genres.map(genre => genre.name).join(', ')}
+     📝 ${selectedMovie.overview}
+    `);
+   });
+  } else {
+   ctx.reply('¡Ups! Hubo un error al buscar la película. Inténtalo de nuevo más tarde.');
+  }
+ });
+});
 
-  // Get movie details
-  const detailsResponse = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=es`)
-  const details = await detailsResponse.json()
-
-  ctx.replyWithHTML(`
-<b>${details.title} (${details.release_date})</b>
-Título original: ${details.original_title}
-Idioma original: ${details.original_language}
-Géneros: ${details.genres.map(genre => genre.name).join(', ')}
-Sinopsis: ${details.overview}
-`)
- })
-})
-
+// Iniciar el bot
 bot.launch();
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
 
-// Ruta "/keep-alive"
-app.get('/keep-alive', (req, res) => {
+// Ruta "/tamosVivos"
+app.get('/tamosVivos', (req, res) => {
  // Enviar una respuesta vacía
  res.send('');
 });
@@ -65,14 +64,14 @@ app.listen(port, () => {
 
  // Código del cliente para mantener la conexión activa
  setInterval(() => {
-  fetch(`http://localhost:${port}/keep-alive`)
+  fetch(`http://localhost:${port}/tamosVivos`)
    .then(response => {
     const currentDate = new Date().toLocaleString("es-VE", { timeZone: "America/Caracas" });
     const formattedTime = currentDate;
     console.log(`Sigo vivo 🎉 (${formattedTime})`);
    })
    .catch(error => {
-    console.error('Error en la solicitud de keep-alive:', error);
+    console.error('Error en la solicitud de tamosVivos:', error);
    });
  }, 5 * 60 * 1000);
  // 30 minutos * 60 segundos * 1000 milisegundos
