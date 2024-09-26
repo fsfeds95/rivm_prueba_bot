@@ -7,33 +7,59 @@ const port = 8225;
 const { Telegraf } = require('telegraf');
 const request = require('request');
 
-const API_KEY = '74dc824830c7f93dc61b03e324070886';
-const BOT_TOKEN = '8180114783:AAFrGu06UhD3DH0wM6VYDupf177JBKz9uHI';
+
+const BOT_TOKEN = '8180114783:AAESz1YJIeFeyRjoEFe5HvHc--7Ck-EE5vg';
+
+// BASE
+const BASE_URL = 'https://api.themoviedb.org/3';
+// API key TMDB
+const API_KEY = 'api_key=74dc824830c7f93dc61b03e324070886';
+
+// Resolución de imagenes
+const IMG_ORI = 'https://image.tmdb.org/t/p/original';
+const IMG_500 = 'https://image.tmdb.org/t/p/w500';
+const IMG_300 = 'https://image.tmdb.org/t/p/w300';
+const IMG_185 = 'https://image.tmdb.org/t/p/w185';
+const IMG_92 = 'https://image.tmdb.org/t/p/w92';
+// Lenguajes
+const LANG_ES = 'language=es-MX';
+const LANG_EN = 'language=en-US';
 
 const bot = new Telegraf(BOT_TOKEN);
 
 bot.on('inline_query', async (ctx) => {
  const query = ctx.inlineQuery.query;
- if (!query) return;
-
- const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=es-ES&query=${encodeURIComponent(query)}`;
+ const url = `${BASE_URL}/search/movie?${API_KEY}&${LANG_ES}&query=${encodeURIComponent(query)}`;
 
  request(url, (error, response, body) => {
   if (!error && response.statusCode === 200) {
    const results = JSON.parse(body).results;
-   const inlineResults = results.map(movie => ({
-    type: 'article',
-    id: movie.id,
-    title: `${movie.title} (${movie.release_date.split('-')[0]})`,
-    input_message_content: {
-     message_text: `https://image.tmdb.org/t/p/w500${movie.backdrop_path ? movie.backdrop_path : ''}\n*${movie.title} (${movie.release_date.split('-')[0]})*\n*Título original:* ${movie.original_title}\n*Idioma original:* ${movie.original_language}\n*Géneros:* ${movie.genre_ids.join(', ')}\n*Sinopsis:* ${movie.overview}`,
-     parse_mode: 'MarkdownV2',
-    },
-    thumb_url: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
-    description: `${movie.original_title}\n1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-25-26-27-28-29-30`,
-   }));
+   const resultsList = results.map(movie => {
 
-   ctx.answerInlineQuery(inlineResults);
+    const idMovie = movie.id;
+    const title = movie.title;
+    const originalTitle = movie.original_title;
+    const releaseYear = movie.release_date.split("-")[0];
+    const posterPath = movie.poster_path;
+    const langCode = movie.original_language;
+    const overview = movie.overview;
+
+    return {
+     type: 'article',
+     id: idMovie,
+     title: `${title} (${releaseYear})`,
+     input_message_content: {
+      message_text: `
+      ${title} (${releaseYear})\n
+      ${originalTitle}\n
+      ${langCode}\n
+      ${overview}`
+     },
+     thumb_url: IMG_92 + posterPath,
+     description: `${originalTitle}`,
+    };
+   });
+   ctx.answerInlineQuery(resultsList);
   }
  });
 });
