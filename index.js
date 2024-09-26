@@ -10,7 +10,7 @@ const { Telegraf } = require('telegraf');
 const jimp = require('jimp-compact');
 const request = require('request');
 
-const BOT_TOKEN = '7224464210:AAFDVRgN1KEfkPkpVtjGbXEtS3oU96YpUu0';
+const BOT_TOKEN = '7723354766:AAFKIP4pSiy75V7IFHk_letMKO5t0MTBt8M';
 
 // BASE
 const BASE_URL = 'https://api.themoviedb.org/3';
