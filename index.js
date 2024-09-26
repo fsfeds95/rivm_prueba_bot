@@ -72,8 +72,8 @@ bot.command('backdrop', async (ctx) => {
    image.resize(1280, 720, jimp.RESIZE_MAGPHASE);
 
    // Cargar las marcas de agua
-   const watermark1 = await jimp.read('./img/b/Wtxt-Backdrop.png');
-   const watermark2 = await jimp.read('./img/b/Wlogo-Backdrop.png');
+   const watermark1 = await jimp.read('Wtxt-Backdrop.png');
+   const watermark2 = await jimp.read('Wlogo-Backdrop.png');
 
    // Escala la marca de agua a 1280px de ancho por 720px de alto
    watermark1.resize(1280, 720);
@@ -156,11 +156,10 @@ bot.on('inline_query', async (ctx) => {
     id: id,
     title: `${title} (${releaseYear})`,
     input_message_content: {
-     message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬`,
-     message_text: `https://fsfeds95.github.io/introMovieClub/moreImage.html?idMovie=${id}`
+     message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬\n\n\nhttps://fsfeds95.github.io/introMovieClub/moreImage.html?idMovie=${id}`
     },
     thumb_url: IMG_92 + posterPath,
-    description: `${originalTitle}\n${overview.substring(0, 48)}...`, // Cambiado aquí
+    description: `${originalTitle}\n${overview.substring(0, 100)}...`, // Cambiado aquí()
    };
   }));
 
@@ -227,17 +226,6 @@ bot.on('audio', (ctx) => {
  ctx.reply('¡Has enviado un audio!');
 });
 
-// Para otros tipos de archivos
-bot.on('message', (ctx) => {
- const username = ctx.from.username ? `@${ctx.from.username}` : '';
- const firstName = ctx.from.first_name ? ctx.from.first_name : '';
- const userId = ctx.from.id;
-
- console.log(`"Nombre: ${firstName}, Usuario: ${username}, con el id: ${userId} envio un tipo de archivo no valido"`);
-
- ctx.reply('¡Ups! Parece que has enviado un formato de archivo no válido. Por favor, intenta enviar una imagen, video, documento o audio en su lugar. ¡Gracias!');
-});
-
 // Responde cuando alguien responde a la imagen
 bot.on('reply_to_message', (ctx) => {
  const username = ctx.from.username ? `@${ctx.from.username}` : '';
@@ -271,6 +259,17 @@ bot.on('text', (ctx) => {
  console.log(`"Nombre: ${firstName}, Usuario: ${username}, con el id: ${userId} envio un texto"`);
 
  ctx.reply('' + ctx.message.text);
+});
+
+// Para otros tipos de archivos
+bot.on('message', (ctx) => {
+ const username = ctx.from.username ? `@${ctx.from.username}` : '';
+ const firstName = ctx.from.first_name ? ctx.from.first_name : '';
+ const userId = ctx.from.id;
+
+ console.log(`"Nombre: ${firstName}, Usuario: ${username}, con el id: ${userId} envio un tipo de archivo no valido"`);
+
+ ctx.reply('¡Ups! Parece que has enviado un formato de archivo no válido. Por favor, intenta enviar una imagen, video, documento o audio en su lugar. ¡Gracias!');
 });
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
