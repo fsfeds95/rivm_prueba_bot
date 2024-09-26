@@ -26,7 +26,7 @@ bot.on('inline_query', async (ctx) => {
     id: movie.id,
     title: `${movie.title} (${movie.release_date.split('-')[0]})`,
     input_message_content: {
-     message_text: `![Backdrop](${movie.backdrop_path ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` : ''})\n**${movie.title} (${movie.release_date.split('-')[0]})**\n**Título original:** ${movie.original_title}\n**Idioma original:** ${movie.original_language}\n**Géneros:** ${movie.genre_ids.join(', ')}\n**Sinopsis:** ${movie.overview}`,
+     message_text: `https://image.tmdb.org/t/p/w500${movie.backdrop_path ? movie.backdrop_path : ''}\n*${movie.title} (${movie.release_date.split('-')[0]})*\n*Título original:* ${movie.original_title}\n*Idioma original:* ${movie.original_language}\n*Géneros:* ${movie.genre_ids.join(', ')}\n*Sinopsis:* ${movie.overview}`,
      parse_mode: 'MarkdownV2',
     },
     thumb_url: `https://image.tmdb.org/t/p/w92${movie.poster_path}`,
@@ -39,6 +39,7 @@ bot.on('inline_query', async (ctx) => {
 });
 
 bot.launch();
+
 
 
 
