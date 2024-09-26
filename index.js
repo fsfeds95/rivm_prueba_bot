@@ -54,49 +54,34 @@ bot.start((ctx) => {
 });
 
 
-// Comando para buscar backdrops
-bot.command('backdrop', (ctx) => {
- const idMovie = ctx.message.text.split(' ')[1]; // Obtiene el ID de la película del mensaje
- const url = `${BASE_URL}/movie/${idMovie}/images?${API_KEY}`;
+// Comando para buscar información de las películas por título
+bot.command('id', (ctx) => {
+ const query = ctx.message.text.split(' ')[1]; // Obtiene el título de la película del mensaje
+ const url = `${BASE_URL}/search/movie?${API_KEY}&${LANG_ES}&query=${encodeURIComponent(query)}`;
 
  request(url, (error, response, body) => {
   if (error) {
    console.log('Ay, mi amor, algo salió mal:', error);
-   ctx.reply('Ocurrió un error al buscar los backdrops. Intenta de nuevo más tarde.');
+   ctx.reply('Ocurrió un error al buscar las películas. Intenta de nuevo más tarde.');
    return;
   }
 
-  const backdrops = JSON.parse(body).backdrops;
+  const data = JSON.parse(body);
 
-  if (backdrops.length === 0) {
-   ctx.reply('Lo siento, no se encontraron backdrops para esta película.');
+  if (!data.results || data.results.length === 0) {
+   ctx.reply('Lo siento, no se encontraron películas con ese título.');
    return;
   }
 
-  // Filtrar backdrops por idioma
-  const filteredBackdrops = backdrops.filter(backdrop => {
-   return backdrop.iso_639_1 === 'es' || backdrop.iso_639_1 === 'en' || backdrop.iso_639_1 === null;
+  let message = 'Resultados encontrados:\n';
+  data.results.forEach(movie => {
+   const title = movie.title; // Título de la película
+   const releaseYear = movie.release_date.split("-")[0]; // Año de estreno
+   const movieId = movie.id; // ID de la película
+   message += 'Título: ${title} (${releaseYear})\nID: `/imagenes ${movieId}`\n▬▬▬▬▬▬▬▬▬\n';
   });
 
-  // Agrupar backdrops por idioma
-  const groupedBackdrops = filteredBackdrops.reduce((acc, backdrop) => {
-   const lang = backdrop.iso_639_1 || 'null'; // Usa 'null' si no hay idioma
-   if (!acc[lang]) acc[lang] = [];
-   if (acc[lang].length < 2) acc[lang].push(backdrop);
-   return acc;
-  }, {});
-
-  // Enviar solo dos backdrops por idioma
-  for (const lang in groupedBackdrops) {
-   groupedBackdrops[lang].forEach(backdrop => {
-    const backdropUrl = IMG_ORI + backdrop.file_path; // Genera la URL de cada backdrop
-    ctx.replyWithPhoto(backdropUrl); // Envía la imagen
-   });
-  }
-
-  if (Object.keys(groupedBackdrops).length === 0) {
-   ctx.reply('No se encontraron backdrops en los idiomas deseados.');
-  }
+  ctx.reply(message);
  });
 });
 
