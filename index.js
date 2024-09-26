@@ -31,7 +31,7 @@ const bot = new Telegraf(BOT_TOKEN);
 
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
-// COMANDOS \\
+//  COMANDOS  \\
 
 // Respuesta de Bienvenida al comando /start
 bot.start((ctx) => {
