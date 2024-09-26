@@ -73,17 +73,15 @@ bot.command('id', (ctx) => {
    return;
   }
 
-  let message = 'Resultados encontrados:<br>';
+  let message = 'Resultados encontrados:\n';
   data.results.forEach(movie => {
    const title = movie.title; // Título de la película
-   const releaseYear = movie.release_date.split('-')[0]; // Extrae solo el año
+   const releaseDate = movie.release_date; // Año de estreno
    const movieId = movie.id; // ID de la película
-   message += `Título: ${title} (${releaseYear})<br>ID: <code>/imagenes ${movieId}</code><br>▬▬▬▬▬▬▬▬▬<br>`;
+   message += `Título: ${title} (${releaseDate})\nID: ${movieId}\n▬▬▬▬▬▬▬▬▬\n`;
   });
 
-  // Asegúrate de que ctx.reply soporte parseo de HTML
-  ctx.replyWithHTML(message);
-
+  ctx.reply(message);
  });
 });
 
