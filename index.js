@@ -4,11 +4,12 @@ const express = require('express');
 const app = express();
 const port = 8225;
 // Importar las dependencias necesarias
-const Telegraf = require('telegraf');
+const { Telegraf } = require('telegraf');
 const request = require('request');
 
 // Definir la API key de TheMovieDB y el token del bot
 const API_KEY = '74dc824830c7f93dc61b03e324070886';
+
 const BOT_TOKEN = '8180114783:AAFrGu06UhD3DH0wM6VYDupf177JBKz9uHI';
 
 // Crear el bot
@@ -47,7 +48,7 @@ bot.command('pelicula', (ctx) => {
  });
 });
 
-// Iniciar el bot
+// Iniciar el bot 
 bot.launch();
 
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
