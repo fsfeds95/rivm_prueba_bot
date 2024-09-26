@@ -8,9 +8,9 @@ const port = 8225;
 const { Telegraf } = require('telegraf');
 // Importar las bibliotecas requeridas
 const jimp = require('jimp-compact');
-const request = require('request-light');
+const got = require('got'); // Cambiado aquí
 
-const BOT_TOKEN = '8180114783:AAH2dc85ZdFdIjBh1Zy5UR7Wv22zLLYgHZ4';
+const BOT_TOKEN = '8180114783:AAH4fqnxhRnhGdLQ84JbWEhnYu9GNJ-wmLs';
 
 // BASE
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -36,18 +36,63 @@ const bot = new Telegraf(BOT_TOKEN);
 // Respuesta de Bienvenida al comando /start
 bot.start((ctx) => {
  const username = ctx.from.username ? `@${ctx.from.username}` : '';
- const firstName = ctx.from.first_name ? ctx.from.first_name : '';
+ const firstName = ctx.from.first_name || ''; // Simplificado
  const userId = ctx.from.id;
 
  console.log(`"Nombre: ${firstName}, Usuario: ${username}, con el id: ${userId} uso : /start"`);
 
  if (!userIds.includes(userId)) {
-  // Agregar el ID si no está ya en el array
-  userIds.push(userId);
+  userIds.push(userId); // Agregar el ID si no está ya en el array
  }
 
  ctx.reply(`¡Hola ${firstName} bienvenido, este es tu usuario ${username}!`);
 });
+
+
+// Iniciamos la búsqueda inline
+bot.on('inline_query', async (ctx) => {
+ const query = ctx.inlineQuery.query;
+ const url = `${BASE_URL}/search/movie?${API_KEY}&${LANG_ES}&query=${encodeURIComponent(query)}`;
+
+ try {
+  const response = await got(url);
+  const results = JSON.parse(response.body).results;
+
+  const resultsList = await Promise.all(results.map(async movie => {
+   const id = movie.id;
+   const title = movie.title;
+   const initial = movie.title.substring(0, 1); // Cambiado aquí
+   const originalTitle = movie.original_title;
+   const releaseYear = movie.release_date.split("-")[0];
+   const posterPath = movie.poster_path;
+   const langCode = movie.original_language;
+   const overview = movie.overview;
+   const genre = movie.genre_ids;
+
+   const langComplete = getLanguage(langCode);
+   const genreEs = getGenres(genre);
+   const durationTime = await getDurationMovie(id);
+   const actors = await getActorsMovie(id);
+
+   return {
+    type: 'article',
+    id: id,
+    title: `${title} (${releaseYear})`,
+    input_message_content: {
+     message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬\n\n\nhttps://fsfeds95.github.io/introMovieClub/moreImage.html?idMovie=${id}`
+    },
+    thumb_url: IMG_92 + posterPath,
+    description: `${originalTitle}\n${overview.substring(0, 100)}...`, // Cambiado aquí
+   };
+  }));
+
+  ctx.answerInlineQuery(resultsList);
+ } catch (error) {
+  console.log('Ay, mi amor, algo salió mal:', error);
+  ctx.answerInlineQuery([{ type: 'article', id: 'error', title: 'Error', input_message_content: { message_text: 'Lo siento, ocurrió un error. Intenta de nuevo más tarde.' } }]);
+ }
+});
+
 
 // Responde cuando alguien usa el comando /backdrop
 bot.command('backdrop', async (ctx) => {
@@ -122,50 +167,6 @@ bot.command('backdrop', async (ctx) => {
  }
 });
 
-// Iniciamos la búsqueda inline
-bot.on('inline_query', async (ctx) => {
- const query = ctx.inlineQuery.query;
- const url = `${BASE_URL}/search/movie?${API_KEY}&${LANG_ES}&query=${encodeURIComponent(query)}`;
-
- try {
-  const response = await request(url);
-  const results = response.body.results;
-
-  const resultsList = await Promise.all(results.map(async movie => {
-   const id = movie.id;
-   const title = movie.title;
-   const initial = movie.title.substring(0, 1);
-   const originalTitle = movie.original_title;
-   const releaseYear = movie.release_date.split("-")[0];
-   const posterPath = movie.poster_path;
-   const langCode = movie.original_language;
-   const overview = movie.overview;
-   const genre = movie.genre_ids;
-
-   const langComplete = getLanguage(langCode);
-   const genreEs = getGenres(genre);
-   const durationTime = await getDurationMovie(id);
-   const actors = await getActorsMovie(id);
-
-   return {
-    type: 'article',
-    id: id,
-    title: `${title} (${releaseYear})`,
-    input_message_content: {
-     message_text: `⟨🔠⟩ #${initial}\n▬▬▬▬▬▬▬▬▬\n⟨🍿⟩ ${title} (${releaseYear})\n⟨🎥⟩ ${originalTitle}\n▬▬▬▬▬▬▬▬▬\n⟨⭐⟩ Tipo : #Pelicula\n⟨🎟⟩ Estreno: #Año${releaseYear}\n⟨🗣️⟩ Idioma Original: ${langComplete}\n⟨🔊⟩ Audio: 🇲🇽 #Dual_Latino\n⟨📺⟩ Calidad: #HD\n⟨⏳⟩ Duración: ${durationTime}\n⟨🎭⟩ Género: ${genreEs}\n⟨👤⟩ Reparto: ${actors}\n▬▬▬▬▬▬▬▬▬\n⟨💭⟩ Sinopsis: ${overview}\n▬▬▬▬▬▬▬▬▬\n\n\nhttps://fsfeds95.github.io/introMovieClub/moreImage.html?idMovie=${id}`
-    },
-    thumb_url: IMG_92 + posterPath,
-    description: `${originalTitle}\n${overview.substring(0, 100)}...`,
-   };
-  }));
-
-  ctx.answerInlineQuery(resultsList);
- } catch (error) {
-  console.log('Ay, mi amor, algo salió mal:', error);
-  ctx.answerInlineQuery([{ type: 'article', id: 'error', title: 'Error', input_message_content: { message_text: 'Lo siento, ocurrió un error. Intenta de nuevo más tarde.' } }]);
- }
-});
-
 //=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=•=\\
 //                        EVENTOS                        \\
 
@@ -180,6 +181,7 @@ bot.on('voice', (ctx) => {
  ctx.reply('Formato no válido');
 });
 
+
 // Ve los fotos
 bot.on('photo', (ctx) => {
  const username = ctx.from.username ? `@${ctx.from.username}` : '';
@@ -192,6 +194,7 @@ bot.on('photo', (ctx) => {
  ctx.reply(`¡Imagen recibida! gracias por enviala ${firstName}\nPuedes usar:\n/backdrop para hacer una marca de agua.`);
 });
 
+
 // Ve los videos
 bot.on('video', (ctx) => {
  const username = ctx.from.username ? `@${ctx.from.username}` : '';
@@ -202,6 +205,7 @@ bot.on('video', (ctx) => {
 
  ctx.reply('¡Has enviado un video!');
 });
+
 
 // Ve los documentos/archivos
 bot.on('document', (ctx) => {
@@ -214,6 +218,7 @@ bot.on('document', (ctx) => {
  ctx.reply('¡Has enviado un documento!');
 });
 
+
 // Ve los audios
 bot.on('audio', (ctx) => {
  const username = ctx.from.username ? `@${ctx.from.username}` : '';
@@ -224,6 +229,7 @@ bot.on('audio', (ctx) => {
 
  ctx.reply('¡Has enviado un audio!');
 });
+
 
 // Responde cuando alguien responde a la imagen
 bot.on('reply_to_message', (ctx) => {
@@ -238,6 +244,7 @@ bot.on('reply_to_message', (ctx) => {
  }
 });
 
+
 // Ve los stickers
 bot.on('sticker', (ctx) => {
  const username = ctx.from.username ? `@${ctx.from.username}` : '';
@@ -249,6 +256,7 @@ bot.on('sticker', (ctx) => {
  ctx.reply('Formato no válido');
 });
 
+
 // Repite todoo lo que le escribas
 bot.on('text', (ctx) => {
  const username = ctx.from.username ? `@${ctx.from.username}` : '';
@@ -259,6 +267,7 @@ bot.on('text', (ctx) => {
 
  ctx.reply('' + ctx.message.text);
 });
+
 
 // Para otros tipos de archivos
 bot.on('message', (ctx) => {
