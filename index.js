@@ -26,16 +26,22 @@ const fetchNews = (ctx = null) => {
    xml2js.parseString(body, (err, result) => {
     if (!err) {
      const items = result.rss.channel[0].item;
-     const latestArticles = items.slice(0, 5); // Últimos 5 artículos
+     const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 5); // Artículos aleatorios
 
      if (ctx) {
-      latestArticles.forEach(item => {
+      randomArticles.forEach(item => {
        const title = item.title[0];
        const link = item.link[0];
        const description = item.description[0];
        const content = item['content:encoded'][0];
        const imageUrl = extractImage(content); // Obtener la imagen
        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+
+       // Agregar categorías como hashtags
+       if (item.category) {
+        const categories = item.category.map(cat => `#${cat}`).join(' ');
+        hashtags.push(...categories);
+       }
 
        const message = `
 ⟨📰⟩ #Noticia
@@ -45,19 +51,27 @@ const fetchNews = (ctx = null) => {
 ⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-
-⟨🗞️⟩ Noticia ⟨🗞️⟩ - ${link}
                             `;
-       ctx.replyWithPhoto(imageUrl, { caption: message }).catch(err => console.error('Error al enviar el mensaje:', err));
+
+       // Crear un botón para el enlace
+       const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
+       ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+        .catch(err => console.error('Error al enviar el mensaje:', err));
       });
      } else {
-      const latestItem = items[0]; // Solo el último artículo
+      const latestItem = randomArticles[0]; // Solo el primer artículo aleatorio
       const title = latestItem.title[0];
       const link = latestItem.link[0];
       const description = latestItem.description[0];
       const content = latestItem['content:encoded'][0];
       const imageUrl = extractImage(content); // Obtener la imagen
       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+
+      // Agregar categorías como hashtags
+      if (latestItem.category) {
+       const categories = latestItem.category.map(cat => `#${cat}`).join(' ');
+       hashtags.push(...categories);
+      }
 
       const message = `
 ⟨📰⟩ #Noticia
@@ -67,10 +81,12 @@ ${hashtags.join(' ')}
 ⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-
-⟨🗞️⟩ Noticia ⟨🗞️⟩ - ${link}
                         `;
-      bot.telegram.sendPhoto('6839704393', imageUrl, { caption: message }).catch(err => console.error('Error al enviar el mensaje:', err));
+
+      // Crear un botón para el enlace
+      const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
+      bot.telegram.sendPhoto('6839704393', imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+       .catch(err => console.error('Error al enviar el mensaje:', err));
      }
     } else {
      console.error('Error al parsear el RSS:', err);
@@ -82,9 +98,9 @@ ${hashtags.join(' ')}
  });
 };
 
-bot.start((ctx) => ctx.reply('¡Hola! Estoy aquí para traerte las últimas noticias de cine.'));
+bot.start((ctx) => ctx.reply('¡Hola! Estoy aquí para traerte las últimas noticias de cine. 🎬'));
 
-bot.command('news', (ctx) => fetchNews(ctx)); // Enviar los últimos 5 artículos
+bot.command('news', (ctx) => fetchNews(ctx)); // Enviar cinco artículos aleatorios
 
 setInterval(() => fetchNews(), 60000); // Mantiene el bot vivo y envía solo el último artículo
 
