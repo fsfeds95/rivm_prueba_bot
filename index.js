@@ -10,7 +10,7 @@ const { Telegraf } = require('telegraf');
 const request = require('request');
 const xml2js = require('xml2js');
 
-const BOT_TOKEN = '7723354766:AAF1LFQ2r2Ti870zZvzyab3DD-bASUrUL4s';
+const BOT_TOKEN = '7723354766:AAFXtPoHejd7jkP1IU26DpUdAkey0AoGVns';
 
 const bot = new Telegraf(BOT_TOKEN);
 const RSS_URL = 'https://www.cinemascomics.com/cine/feed/';
