@@ -10,7 +10,7 @@ const { Telegraf } = require('telegraf');
 const request = require('request');
 const xml2js = require('xml2js');
 
-const BOT_TOKEN = '7723354766:AAFXtPoHejd7jkP1IU26DpUdAkey0AoGVns';
+const BOT_TOKEN = '7723354766:AAF7jiQZrmUM6Qvbik11X626krJzRUcZJXY';
 
 const bot = new Telegraf(BOT_TOKEN);
 const RSS_URL = [
@@ -119,8 +119,21 @@ ${finalHashtags}
 
        // Crear un botón para el enlace
        const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
-       bot.telegram.sendPhoto('6839704393', imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+
+       const personalId = '6839704393';
+
+       bot.telegram.sendPhoto(personalId, imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
         .catch(err => console.error('Error al enviar el mensaje:', err));
+
+
+       const channelId = [
+        '2462156351'
+       ];
+
+       // En lugar de ctx.replyWithPhoto, usa:
+       bot.telegram.sendPhoto(channelId, imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+        .catch(err => console.error('Error al enviar el mensaje al canal:', err));
+
       }
      } else {
       console.error('Error al parsear el RSS:', err);
