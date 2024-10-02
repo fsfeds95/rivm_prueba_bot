@@ -42,6 +42,20 @@ const fetchNews = (ctx = null) => {
        const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
        const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
 
+       // Crear un conjunto de hashtags únicos
+       const uniqueHashtags = new Set(hashtags);
+
+       // Comparar y eliminar los que ya están en hashtags
+       hashtagCat.split(' ').forEach(cat => {
+        if (cat) {
+         uniqueHashtags.delete(cat); // Elimina si ya existe
+        }
+       });
+
+       // Unir los hashtags únicos de nuevo en una cadena
+       const finalHashtags = Array.from(uniqueHashtags).join(' ');
+
+
        const message = `
 ⟨📰⟩ #Noticia
 ▬▬▬▬▬▬▬▬▬
@@ -49,9 +63,9 @@ const fetchNews = (ctx = null) => {
 ▬▬▬▬▬▬▬▬▬
 ⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
-${hashtags.join(' ')}
-${hashtagCat}
-                            `;
+${finalHashtags}
+▬▬▬▬▬▬▬▬▬
+`;
 
        // Crear un botón para el enlace
        const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
@@ -72,6 +86,20 @@ ${hashtagCat}
       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
 
+      // Crear un conjunto de hashtags únicos
+      const uniqueHashtags = new Set(hashtags);
+
+      // Comparar y eliminar los que ya están en hashtags
+      hashtagCat.split(' ').forEach(cat => {
+       if (cat) {
+        uniqueHashtags.delete(cat); // Elimina si ya existe
+       }
+      });
+
+      // Unir los hashtags únicos de nuevo en una cadena
+      const finalHashtags = Array.from(uniqueHashtags).join(' ');
+
+
       const message = `
 ⟨📰⟩ #Noticia
 ▬▬▬▬▬▬▬▬▬
@@ -79,9 +107,9 @@ ${hashtagCat}
 ▬▬▬▬▬▬▬▬▬
 ⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
-${hashtags.join(' ')}
-${hashtagCat}
-                        `;
+${finalHashtags}
+▬▬▬▬▬▬▬▬▬
+`;
 
       // Crear un botón para el enlace
       const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
