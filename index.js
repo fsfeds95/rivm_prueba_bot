@@ -50,7 +50,7 @@ const fetchNews = (ctx = null) => {
         const description = item.description[0];
         const content = item['content:encoded'][0];
         const imageUrl = extractImage(content); // Obtener la imagen
-        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento', '#introCinemaClub'];
 
         // Obtener categorías como texto plano
         const categoriesText = item.category ? item.category : []; // Cambié latestItem a item
@@ -101,8 +101,7 @@ ${finalHashtags}
        const description = latestItem.description[0];
        const content = latestItem['content:encoded'][0];
        const imageUrl = extractImage(content); // Obtener la imagen
-       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
-
+       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento', '#introCinemaClub'];
        // Obtener categorías como texto plano
        const categoriesText = latestItem.category ? latestItem.category : [];
        const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
