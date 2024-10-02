@@ -10,7 +10,7 @@ const { Telegraf } = require('telegraf');
 const request = require('request');
 const xml2js = require('xml2js');
 
-const BOT_TOKEN = '7723354766:AAFXtPoHejd7jkP1IU26DpUdAkey0AoGVns';
+const BOT_TOKEN = '7723354766:AAF1LFQ2r2Ti870zZvzyab3DD-bASUrUL4s';
 
 const bot = new Telegraf(BOT_TOKEN);
 const RSS_URL = 'https://www.cinemascomics.com/cine/feed/';
@@ -22,7 +22,7 @@ const extractImage = (content) => {
 
 const fetchNews = (ctx = null) => {
  request(RSS_URL, (error, response, body) => {
-  if (!error && response.statusCode == 200) {
+  if (!error && response.statusCode === 200) {
    xml2js.parseString(body, (err, result) => {
     if (!err) {
      const items = result.rss.channel[0].item;
@@ -35,13 +35,10 @@ const fetchNews = (ctx = null) => {
        const description = item.description[0];
        const content = item['content:encoded'][0];
        const imageUrl = extractImage(content); // Obtener la imagen
-       const hashtag = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
-       // Agregar categorías como hashtags
-       if (item.category) {
-        const categories = item.category.map(cat => `#${cat}`).join(' ');
-        hashtags.push(...categories);
-       }
+       // Obtener categorías como texto plano
+       const categoriesText = item.category ? item.category.join(', #') : '';
 
        const message = `
 ⟨📰⟩ #Noticia
@@ -51,10 +48,11 @@ const fetchNews = (ctx = null) => {
 ⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
+#${categoriesText}
                             `;
 
        // Crear un botón para el enlace
-       const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
+       const button = [{ text: 'Leer Noticia', url: link }];
        ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
         .catch(err => console.error('Error al enviar el mensaje:', err));
       });
@@ -65,13 +63,10 @@ ${hashtags.join(' ')}
       const description = latestItem.description[0];
       const content = latestItem['content:encoded'][0];
       const imageUrl = extractImage(content); // Obtener la imagen
-      const hashtag = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+      const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
-      // Agregar categorías como hashtags
-      if (latestItem.category) {
-       const categories = latestItem.category.map(cat => `#${cat}`).join(' ');
-       hashtags.push(...categories);
-      }
+      // Obtener categorías como texto plano
+      const categoriesText = latestItem.category ? latestItem.category.join(', #') : '';
 
       const message = `
 ⟨📰⟩ #Noticia
@@ -81,10 +76,11 @@ ${hashtags.join(' ')}
 ⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
+#${categoriesText}
                         `;
 
       // Crear un botón para el enlace
-      const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
+      const button = [{ text: 'Leer Noticia', url: link }];
       bot.telegram.sendPhoto('6839704393', imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
        .catch(err => console.error('Error al enviar el mensaje:', err));
      }
