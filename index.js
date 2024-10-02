@@ -18,57 +18,57 @@ const RSS_URL = [
 ];
 
 const extractImage = (content) => {
- const match = content.match(/<img[^>]+src="([^">]+)"/);
- return match ? match[1] : null; // Retorna la URL de la primera imagen
+    const match = content.match(/<img[^>]+src="([^">]+)"/);
+    return match ? match[1] : null; // Retorna la URL de la primera imagen
 };
 
 const isValidImageUrl = (url, callback) => {
- request.head(url, (err, res) => {
-  if (!err && res.statusCode === 200) {
-   callback(true);
-  } else {
-   callback(false);
-  }
- });
+    request.head(url, (err, res) => {
+        if (!err && res.statusCode === 200) {
+            callback(true);
+        } else {
+            callback(false);
+        }
+    });
 };
 
 const fetchNews = (ctx = null) => {
- RSS_URL.forEach(url => {
-  request(url, (error, response, body) => {
-   if (!error && response.statusCode === 200) {
-    xml2js.parseString(body, (err, result) => {
-     if (!err) {
-      const items = result.rss.channel[0].item;
-      const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 3); // Artículos aleatorios
+    RSS_URL.forEach(url => {
+        request(url, (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                xml2js.parseString(body, (err, result) => {
+                    if (!err) {
+                        const items = result.rss.channel[0].item;
+                        const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 3); // Artículos aleatorios
 
-      if (ctx) {
-       randomArticles.forEach(item => {
-        const title = item.title[0];
-        const link = item.link[0];
-        const description = item.description[0];
-        const content = item['content:encoded'][0];
-        const imageUrl = extractImage(content); // Obtener la imagen
-        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento', '#introCinemaClub'];
+                        if (ctx) {
+                            randomArticles.forEach(item => {
+                                const title = item.title[0];
+                                const link = item.link[0];
+                                const description = item.description[0];
+                                const content = item['content:encoded'][0];
+                                const imageUrl = extractImage(content); // Obtener la imagen
+                                const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
-        // Obtener categorías como texto plano
-        const categoriesText = item.category ? item.category : [];
-        const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
-        const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
+                                // Obtener categorías como texto plano
+                                const categoriesText = item.category ? item.category : [];
+                                const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
+                                const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
 
-        // Crear un conjunto de hashtags únicos
-        const uniqueHashtags = new Set(hashtags);
+                                // Crear un conjunto de hashtags únicos
+                                const uniqueHashtags = new Set(hashtags);
 
-        // Comparar y eliminar los que ya están en hashtags
-        hashtagCat.split(' ').forEach(cat => {
-         if (cat) {
-          uniqueHashtags.delete(cat); // Elimina si ya existe
-         }
-        });
+                                // Comparar y eliminar los que ya están en hashtags
+                                hashtagCat.split(' ').forEach(cat => {
+                                    if (cat) {
+                                        uniqueHashtags.delete(cat); // Elimina si ya existe
+                                    }
+                                });
 
-        // Unir los hashtags únicos de nuevo en una cadena
-        const finalHashtags = Array.from(uniqueHashtags).join(' ');
+                                // Unir los hashtags únicos de nuevo en una cadena
+                                const finalHashtags = Array.from(uniqueHashtags).join(' ');
 
-        const message = `
+                                const message = `
 ⟨📰⟩ #Noticia
 ▬▬▬▬▬▬▬▬▬
 ⟨🍿⟩ ${title}
@@ -79,60 +79,56 @@ ${finalHashtags}
 ▬▬▬▬▬▬▬▬▬
 `;
 
-        // Verificar si la URL de la imagen es válida
-        isValidImageUrl(imageUrl, (isValid) => {
-         if (isValid) {
-          // Crear un botón para el enlace
-          const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
-          if (ctx) {
-           ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
-            .catch(err => console.error('Error al enviar el mensaje:', err));
-          } else {
-           console.error('Contexto no válido (ctx es null)');
-          }
-         } else {
-          console.error('URL de imagen no válida:', imageUrl);
-         }
+                                // Verificar si la URL de la imagen es válida
+                                isValidImageUrl(imageUrl, (isValid) => {
+                                    if (isValid) {
+                                        // Crear un botón para el enlace
+                                        const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
+                                        ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+                                            .catch(err => console.error('Error al enviar el mensaje:', err));
+                                    } else {
+                                        console.error('URL de imagen no válida:', imageUrl);
+                                    }
+                                });
+                            });
+                        }
+                    } else {
+                        console.error('Error al parsear el RSS:', err);
+                    }
+                });
+            } else {
+                console.error('Error al obtener el RSS:', error);
+            }
         });
-       });
-      }
-     } else {
-      console.error('Error al parsear el RSS:', err);
-     }
     });
-   } else {
-    console.error('Error al obtener el RSS:', error);
-   }
-  });
- });
 };
 
 bot.start((ctx) => ctx.reply('¡Hola! Estoy aquí para traerte las últimas noticias de cine. 🎬'));
 
 bot.command('news', (ctx) => fetchNews(ctx)); // Enviar artículos aleatorios
 
-setInterval(() => fetchNews(), 900000); // Mantiene el bot vivo y envía solo el último artículo
+setInterval(() => fetchNews(), 60000); // Mantiene el bot vivo y envía solo el último artículo
 
 bot.launch();
 
 // Ruta "/ping"
 app.get('/ping', (req, res) => {
- res.send('');
+    res.send('');
 });
 
 // Iniciar el servidor en el puerto 8225
 app.listen(port, () => {
- console.log(`Servidor iniciado en http://localhost:${port}`);
+    console.log(`Servidor iniciado en http://localhost:${port}`);
 
- // Código del cliente para mantener la conexión activa
- setInterval(() => {
-  fetch(`http://localhost:${port}/ping`)
-   .then(response => {
-    const currentDate = new Date().toLocaleString("es-VE", { timeZone: "America/Caracas" });
-    console.log(`Sigo vivo 🎉 (${currentDate})`);
-   })
-   .catch(error => {
-    console.error('Error en la solicitud de ping:', error);
-   });
- }, 5 * 60 * 1000); // 5 m * 60 s * 1000 ms
+    // Código del cliente para mantener la conexión activa
+    setInterval(() => {
+        fetch(`http://localhost:${port}/ping`)
+            .then(response => {
+                const currentDate = new Date().toLocaleString("es-VE", { timeZone: "America/Caracas" });
+                console.log(`Sigo vivo 🎉 (${currentDate})`);
+            })
+            .catch(error => {
+                console.error('Error en la solicitud de ping:', error);
+            });
+    }, 5 * 60 * 1000); // 5 m * 60 s * 1000 ms
 });
