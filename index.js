@@ -38,7 +38,7 @@ const fetchNews = (ctx = null) => {
        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
        // Obtener categorías como texto plano
-       const categoriesText = item.category ? item.category.replace(/\s/g, '_').join(' #') : '';
+       const categoriesText = item.category ? item.category.join(' #') : '';
 
        const message = `
 ⟨📰⟩ #Noticia
@@ -66,7 +66,7 @@ ${hashtags.join(' ')}
       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
       // Obtener categorías como texto plano
-      const categoriesText = latestItem.category ? latestItem.category.replace(/\s/g, '_').join(' #') : '';
+      const categoriesText = latestItem.category ? latestItem.category.join(' #') : '';
 
       const message = `
 ⟨📰⟩ #Noticia
