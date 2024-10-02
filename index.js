@@ -32,42 +32,41 @@ const isValidImageUrl = (url, callback) => {
 };
 
 const fetchCine = (ctx = null) => {
- RSS_cine.forEach(url => {
-  request(url, (error, response, body) => {
-   if (!error && response.statusCode === 200) {
-    xml2js.parseString(body, (err, result) => {
-     if (!err) {
-      const items = result.rss.channel[0].item;
-      const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 5); // Artículos aleatorios
+ request(RSS_cine, (error, response, body) => {
+  if (!error && response.statusCode === 200) {
+   xml2js.parseString(body, (err, result) => {
+    if (!err) {
+     const items = result.rss.channel[0].item;
+     const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 3); // Artículos aleatorios
 
-      if (ctx) {
-       randomArticles.forEach(item => {
-        const title = item.title[0];
-        const link = item.link[0];
-        const description = item.description[0];
-        const content = item['content:encoded'][0];
-        const imageUrl = extractImage(content); // Obtener la imagen
-        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento', '#introCinemaClub'];
+     if (ctx) {
+      randomArticles.forEach(item => {
+       const title = item.title[0];
+       const link = item.link[0];
+       const description = item.description[0];
+       const content = item['content:encoded'][0];
+       const imageUrl = extractImage(content); // Obtener la imagen
+       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
-        // Obtener categorías como texto plano
-        const categoriesText = item.category ? item.category : [];
-        const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
-        const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
+       // Obtener categorías como texto plano
+       const categoriesText = item.category ? item.category : [];
+       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
+       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
 
-        // Crear un conjunto de hashtags únicos
-        const uniqueHashtags = new Set(hashtags);
+       // Crear un conjunto de hashtags únicos
+       const uniqueHashtags = new Set(hashtags);
 
-        // Comparar y eliminar los que ya están en hashtags
-        hashtagCat.split(' ').forEach(cat => {
-         if (cat) {
-          uniqueHashtags.delete(cat); // Elimina si ya existe
-         }
-        });
+       // Comparar y eliminar los que ya están en hashtags
+       hashtagCat.split(' ').forEach(cat => {
+        if (cat) {
+         uniqueHashtags.delete(cat); // Elimina si ya existe
+        }
+       });
 
-        // Unir los hashtags únicos de nuevo en una cadena
-        const finalHashtags = Array.from(uniqueHashtags).join(' ');
+       // Unir los hashtags únicos de nuevo en una cadena
+       const finalHashtags = Array.from(uniqueHashtags).join(' ');
 
-        const message = `
+       const message = `
 ⟨📰⟩ #Noticia
 ▬▬▬▬▬▬▬▬▬
 ⟨🍿⟩ ${title}
@@ -78,67 +77,65 @@ ${finalHashtags}
 ▬▬▬▬▬▬▬▬▬
 `;
 
-        // Verificar si la URL de la imagen es válida
-        isValidImageUrl(imageUrl, (isValid) => {
-         if (isValid) {
-          // Crear un botón para el enlace
-          const button = [{ text: '⟨🗞️⟩ Leer más ⟨🗞️⟩', url: link }];
-          ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
-           .catch(err => console.error('Error al enviar el mensaje:', err));
-         } else {
-          console.error('URL de imagen no válida:', imageUrl);
-         }
-        });
+       // Verificar si la URL de la imagen es válida
+       isValidImageUrl(imageUrl, (isValid) => {
+        if (isValid) {
+         // Crear un botón para el enlace
+         const button = [{ text: '⟨🗞️⟩ Leer más ⟨🗞️⟩', url: link }];
+         ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+          .catch(err => console.error('Error al enviar el mensaje:', err));
+        } else {
+         console.error('URL de imagen no válida:', imageUrl);
+        }
        });
-      }
-     } else {
-      console.error('Error al parsear el RSS:', err);
+      });
      }
-    });
-   } else {
-    console.error('Error al obtener el RSS:', error);
-   }
-  });
+    } else {
+     console.error('Error al parsear el RSS:', err);
+    }
+   });
+  } else {
+   console.error('Error al obtener el RSS:', error);
+  }
  });
 };
 
 const fetchSerie = (ctx = null) => {
- RSS_serie.forEach(url => {
-  request(url, (error, response, body) => {
-   if (!error && response.statusCode === 200) {
-    xml2js.parseString(body, (err, result) => {
-     if (!err) {
-      const items = result.rss.channel[0].item;
-      const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 5); // Artículos aleatorios
+ request(RSS_serie, (error, response, body) => {
+  if (!error && response.statusCode === 200) {
+   xml2js.parseString(body, (err, result) => {
+    if (!err) {
+     const items = result.rss.channel[0].item;
+     const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 3); // Artículos aleatorios
 
-      if (ctx) {
-       randomArticles.forEach(item => {
-        const title = item.title[0];
-        const link = item.link[0];
-        const description = item.description[0];
-        const content = item['content:encoded'][0];
-        const imageUrl = extractImage(content); // Obtener la imagen
-        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento', '#introCinemaClub'];
+     if (ctx) {
+      randomArticles.forEach(item => {
+       const title = item.title[0];
+       const link = item.link[0];
+       const description = item.description[0];
+       const content = item['content:encoded'][0];
+       const imageUrl = extractImage(content); // Obtener la imagen
+       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
-        // Obtener categorías como texto plano
-        const categoriesText = item.category ? item.category : [];
-        const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
-        const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
+       // Obtener categorías como texto plano
+       const categoriesText = item.category ? item.category : [];
+       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
+       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
 
-        // Crear un conjunto de hashtags únicos
-        const uniqueHashtags = new Set(hashtags);
+       // Crear un conjunto de hashtags únicos
+       const uniqueHashtags = new Set(hashtags);
 
-        // Comparar y eliminar los que ya están en hashtags
-        hashtagCat.split(' ').forEach(cat => {
-         if (cat) {
-          uniqueHashtags.delete(cat); // Elimina si ya existe
-         }
-        });
+       // Comparar y eliminar los que ya están en hashtags
+       hashtagCat.split(' ').forEach(cat => {
+        if (cat) {
+         uniqueHashtags.delete(cat); // Elimina si ya existe
+        }
+       });
 
-        // Unir los hashtags únicos de nuevo en una cadena
-        const finalHashtags = Array.from(uniqueHashtags).join(' ');
+       // Unir los hashtags únicos de nuevo en una cadena
+       const finalHashtags = Array.from(uniqueHashtags).join(' ');
 
-        const message = `
+       const message = `
 ⟨📰⟩ #Noticia
 ▬▬▬▬▬▬▬▬▬
 ⟨🍿⟩ ${title}
@@ -149,27 +146,26 @@ ${finalHashtags}
 ▬▬▬▬▬▬▬▬▬
 `;
 
-        // Verificar si la URL de la imagen es válida
-        isValidImageUrl(imageUrl, (isValid) => {
-         if (isValid) {
-          // Crear un botón para el enlace
-          const button = [{ text: '⟨🗞️⟩ Leer más ⟨🗞️⟩', url: link }];
-          ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
-           .catch(err => console.error('Error al enviar el mensaje:', err));
-         } else {
-          console.error('URL de imagen no válida:', imageUrl);
-         }
-        });
+       // Verificar si la URL de la imagen es válida
+       isValidImageUrl(imageUrl, (isValid) => {
+        if (isValid) {
+         // Crear un botón para el enlace
+         const button = [{ text: '⟨🗞️⟩ Leer más ⟨🗞️⟩', url: link }];
+         ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+          .catch(err => console.error('Error al enviar el mensaje:', err));
+        } else {
+         console.error('URL de imagen no válida:', imageUrl);
+        }
        });
-      }
-     } else {
-      console.error('Error al parsear el RSS:', err);
+      });
      }
-    });
-   } else {
-    console.error('Error al obtener el RSS:', error);
-   }
-  });
+    } else {
+     console.error('Error al parsear el RSS:', err);
+    }
+   });
+  } else {
+   console.error('Error al obtener el RSS:', error);
+  }
  });
 };
 
