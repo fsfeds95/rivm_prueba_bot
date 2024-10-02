@@ -98,7 +98,7 @@ bot.start((ctx) => ctx.reply('¡Hola! Estoy aquí para traerte las últimas noti
 
 bot.command('news', (ctx) => fetchNews(ctx)); // Enviar cinco artículos aleatorios
 
-setInterval(() => fetchNews(), 60000); // Mantiene el bot vivo y envía solo el último artículo
+setInterval(() => fetchNews(), 900000); // Mantiene el bot vivo y envía solo el último artículo
 
 bot.launch();
 
