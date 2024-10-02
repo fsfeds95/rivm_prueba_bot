@@ -6,7 +6,6 @@ const port = 8225;
 
 // Importar las dependencias necesarias
 const { Telegraf } = require('telegraf');
-// Importar las bibliotecas requeridas
 const request = require('request');
 const xml2js = require('xml2js');
 
@@ -14,9 +13,8 @@ const BOT_TOKEN = '7723354766:AAFlbfzZWUnQ7rAed69_yF0g2U-g2bMjAmg';
 
 const bot = new Telegraf(BOT_TOKEN);
 const RSS_URL = [
- 'https://www.cinemascomics.com/cine/feed/',
- 'https://www.cinemascomics.com/series-de-television/feed/'
- // Agrega más URLs aquí
+    'https://www.cinemascomics.com/cine/feed/',
+    'https://www.cinemascomics.com/series-de-television/feed/'
 ];
 
 const extractImage = (content) => {
@@ -53,7 +51,7 @@ const fetchNews = (ctx = null) => {
         const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento', '#introCinemaClub'];
 
         // Obtener categorías como texto plano
-        const categoriesText = item.category ? item.category : []; // Cambié latestItem a item
+        const categoriesText = item.category ? item.category : [];
         const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
         const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
 
@@ -69,7 +67,6 @@ const fetchNews = (ctx = null) => {
 
         // Unir los hashtags únicos de nuevo en una cadena
         const finalHashtags = Array.from(uniqueHashtags).join(' ');
-
 
         const message = `
 ⟨📰⟩ #Noticia
@@ -87,63 +84,17 @@ ${finalHashtags}
          if (isValid) {
           // Crear un botón para el enlace
           const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
-          ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
-           .catch(err => console.error('Error al enviar el mensaje:', err));
+          if (ctx) {
+           ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
+            .catch(err => console.error('Error al enviar el mensaje:', err));
+          } else {
+           console.error('Contexto no válido (ctx es null)');
+          }
          } else {
           console.error('URL de imagen no válida:', imageUrl);
          }
         });
        });
-      } else {
-       const latestItem = randomArticles[0]; // Solo el primer artículo aleatorio
-       const title = latestItem.title[0];
-       const link = latestItem.link[0];
-       const description = latestItem.description[0];
-       const content = latestItem['content:encoded'][0];
-       const imageUrl = extractImage(content); // Obtener la imagen
-       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento', '#introCinemaClub'];
-       // Obtener categorías como texto plano
-       const categoriesText = latestItem.category ? latestItem.category : [];
-       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
-       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
-
-       // Crear un conjunto de hashtags únicos
-       const uniqueHashtags = new Set(hashtags);
-
-       // Comparar y eliminar los que ya están en hashtags
-       hashtagCat.split(' ').forEach(cat => {
-        if (cat) {
-         uniqueHashtags.delete(cat); // Elimina si ya existe
-        }
-       });
-
-       // Unir los hashtags únicos de nuevo en una cadena
-       const finalHashtags = Array.from(uniqueHashtags).join(' ');
-
-
-       const message = `
-⟨📰⟩ #Noticia
-▬▬▬▬▬▬▬▬▬
-⟨🍿⟩ ${title}
-▬▬▬▬▬▬▬▬▬
-⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
-▬▬▬▬▬▬▬▬▬
-${finalHashtags}
-▬▬▬▬▬▬▬▬▬
-`;
-
-       // Verificar si la URL de la imagen es válida
-       isValidImageUrl(imageUrl, (isValid) => {
-        if (isValid) {
-         // Crear un botón para el enlace
-         const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
-         ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
-          .catch(err => console.error('Error al enviar el mensaje:', err));
-        } else {
-         console.error('URL de imagen no válida:', imageUrl);
-        }
-       });
-
       }
      } else {
       console.error('Error al parsear el RSS:', err);
@@ -158,7 +109,7 @@ ${finalHashtags}
 
 bot.start((ctx) => ctx.reply('¡Hola! Estoy aquí para traerte las últimas noticias de cine. 🎬'));
 
-bot.command('news', (ctx) => fetchNews(ctx)); // Enviar cinco artículos aleatorios
+bot.command('news', (ctx) => fetchNews(ctx)); // Enviar artículos aleatorios
 
 setInterval(() => fetchNews(), 900000); // Mantiene el bot vivo y envía solo el último artículo
 
