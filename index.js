@@ -38,10 +38,9 @@ const fetchNews = (ctx = null) => {
        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
        // Obtener categorías como texto plano
-       const categoriesText = latestItem.category ? latestItem.category : [];
+       const categoriesText = item.category ? item.category : []; // Cambié latestItem a item
        const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
        const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
-
 
        const message = `
 ⟨📰⟩ #Noticia
@@ -73,7 +72,6 @@ ${hashtagCat}
       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
 
-
       const message = `
 ⟨📰⟩ #Noticia
 ▬▬▬▬▬▬▬▬▬
@@ -99,6 +97,7 @@ ${hashtagCat}
   }
  });
 };
+
 
 bot.start((ctx) => ctx.reply('¡Hola! Estoy aquí para traerte las últimas noticias de cine. 🎬'));
 
