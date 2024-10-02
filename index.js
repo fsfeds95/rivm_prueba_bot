@@ -10,7 +10,7 @@ const { Telegraf } = require('telegraf');
 const request = require('request');
 const xml2js = require('xml2js');
 
-const BOT_TOKEN = '7723354766:AAF7jiQZrmUM6Qvbik11X626krJzRUcZJXY';
+const BOT_TOKEN = '7723354766:AAFulFEn2NW2gOP-b0t8ZuDRJWulqynMFt4';
 
 const bot = new Telegraf(BOT_TOKEN);
 const RSS_URL = [
