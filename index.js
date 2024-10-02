@@ -38,7 +38,10 @@ const fetchNews = (ctx = null) => {
        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
        // Obtener categorías como texto plano
-       const categoriesText = item.category ? item.category.join(' ').replace(/\s/g, '_') : '';
+       const categoriesText = latestItem.category ? latestItem.category : [];
+       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
+       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
+
 
        const message = `
 ⟨📰⟩ #Noticia
@@ -48,7 +51,7 @@ const fetchNews = (ctx = null) => {
 ⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-${categoriesText}
+${hashtagCat}
                             `;
 
        // Crear un botón para el enlace
@@ -66,7 +69,10 @@ ${categoriesText}
       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
       // Obtener categorías como texto plano
-      const categoriesText = latestItem.category ? latestItem.category.join(' ').replace(/\s/g, '_') : '';
+      const categoriesText = latestItem.category ? latestItem.category : [];
+      const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
+      const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
+
 
       const message = `
 ⟨📰⟩ #Noticia
@@ -76,7 +82,7 @@ ${categoriesText}
 ⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-${categoriesText}
+${hashtagCat}
                         `;
 
       // Crear un botón para el enlace
