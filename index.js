@@ -35,7 +35,7 @@ const fetchNews = (ctx = null) => {
        const description = item.description[0];
        const content = item['content:encoded'][0];
        const imageUrl = extractImage(content); // Obtener la imagen
-       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+       const hashtag = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
        // Agregar categorías como hashtags
        if (item.category) {
@@ -65,7 +65,7 @@ ${hashtags.join(' ')}
       const description = latestItem.description[0];
       const content = latestItem['content:encoded'][0];
       const imageUrl = extractImage(content); // Obtener la imagen
-      const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+      const hashtag = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
       // Agregar categorías como hashtags
       if (latestItem.category) {
