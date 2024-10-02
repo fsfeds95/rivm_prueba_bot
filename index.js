@@ -45,7 +45,7 @@ const fetchNews = (ctx = null) => {
 ▬▬▬▬▬▬▬▬▬
 ⟨🍿⟩ ${title}
 ▬▬▬▬▬▬▬▬▬
-⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
+⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
 #${categoriesText}
@@ -73,7 +73,7 @@ ${hashtags.join(' ')}
 ▬▬▬▬▬▬▬▬▬
 ⟨🍿⟩ ${title}
 ▬▬▬▬▬▬▬▬▬
-⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
+⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
 #${categoriesText}
