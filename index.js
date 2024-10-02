@@ -1,5 +1,3 @@
-Así está bien?🤔
-```javacript
 // Importar las bibliotecas requeridas
 const express = require('express');
 // Crea una aplicación en Express
@@ -188,4 +186,3 @@ app.listen(port, () => {
    });
  }, 5 * 60 * 1000); // 5 m * 60 s * 1000 ms
 });
-```
