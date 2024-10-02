@@ -38,7 +38,7 @@ const fetchNews = (ctx = null) => {
        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
        // Obtener categorías como texto plano
-       const categoriesText = item.category ? item.category.join(' #') : '';
+       const categoriesText = item.category ? item.category.join(' ').replace(/\s/g, '_') : '';
 
        const message = `
 ⟨📰⟩ #Noticia
@@ -48,7 +48,7 @@ const fetchNews = (ctx = null) => {
 ⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-#${categoriesText}
+${categoriesText}
                             `;
 
        // Crear un botón para el enlace
@@ -66,7 +66,7 @@ ${hashtags.join(' ')}
       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
       // Obtener categorías como texto plano
-      const categoriesText = latestItem.category ? latestItem.category.join(' #') : '';
+      const categoriesText = latestItem.category ? latestItem.category.join(' ').replace(/\s/g, '_') : '';
 
       const message = `
 ⟨📰⟩ #Noticia
@@ -76,7 +76,7 @@ ${hashtags.join(' ')}
 ⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-#${categoriesText}
+${categoriesText}
                         `;
 
       // Crear un botón para el enlace
