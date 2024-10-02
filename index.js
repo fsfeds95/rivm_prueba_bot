@@ -38,7 +38,7 @@ const fetchNews = (ctx = null) => {
        const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
        // Obtener categorías como texto plano
-       const categoriesText = item.category ? item.category.join(', #') : '';
+       const categoriesText = item.category ? item.category.join(' #') : '';
 
        const message = `
 ⟨📰⟩ #Noticia
@@ -48,11 +48,11 @@ const fetchNews = (ctx = null) => {
 ⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-#${categoriesText}
+#${categoriesText.replace(/\s/g, '_')}
                             `;
 
        // Crear un botón para el enlace
-       const button = [{ text: 'Leer Noticia', url: link }];
+       const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
        ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
         .catch(err => console.error('Error al enviar el mensaje:', err));
       });
@@ -66,7 +66,7 @@ ${hashtags.join(' ')}
       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
 
       // Obtener categorías como texto plano
-      const categoriesText = latestItem.category ? latestItem.category.join(', #') : '';
+      const categoriesText = latestItem.category ? latestItem.category.join(' #') : '';
 
       const message = `
 ⟨📰⟩ #Noticia
@@ -76,11 +76,11 @@ ${hashtags.join(' ')}
 ⟨💭⟩ Resumen: ${description.substring(0, 1000)}...
 ▬▬▬▬▬▬▬▬▬
 ${hashtags.join(' ')}
-#${categoriesText}
+#${categoriesText.replace(/\s/g, '_')}
                         `;
 
       // Crear un botón para el enlace
-      const button = [{ text: 'Leer Noticia', url: link }];
+      const button = [{ text: '⟨🗞️⟩ Noticia ⟨🗞️⟩', url: link }];
       bot.telegram.sendPhoto('6839704393', imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
        .catch(err => console.error('Error al enviar el mensaje:', err));
      }
