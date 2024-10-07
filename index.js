@@ -49,7 +49,7 @@ bot.command('agregar_pelicula', (ctx) => {
   movieData = {}; // Reinicia los datos
   ctx.reply('Envia el Título de la película en español.');
  } else {
-  ctx.reply('Lo siento, solo el administrador puede usar este comando. 😘');
+  ctx.reply('Lo siento, solo el administrador puede usar este comando.');
  }
 });
 
@@ -153,7 +153,7 @@ bot.on('callback_query', async (ctx) => {
  }
 
  await movie.save();
- ctx.answerCbQuery('Gracias por tu reacción! ❤️');
+ ctx.answerCbQuery('Gracias por reaccionar.');
 });
 
 bot.launch(); // Inicia el bot
