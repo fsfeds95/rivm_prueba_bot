@@ -114,8 +114,13 @@ bot.on('text', (ctx) => {
  }
 });
 
-bot.command('pelicula', async (ctx) => {
+bot.command('movie', async (ctx) => {
  const movies = await Movie.find();
+ if (movies.length === 0) {
+  ctx.reply('¡Ups! No se ha encontrado ninguna película.');
+  return;
+ }
+
  const randomMovie = movies[Math.floor(Math.random() * movies.length)];
  ctx.replyWithPhoto(randomMovie.urlImg, {
   caption: `${randomMovie.titleEsp}\n${randomMovie.titleOrg}\nAño: ${randomMovie.anio}\nGéneros: ${randomMovie.genreEsp}\nSinopsis: ${randomMovie.sinopsisEsp}`,
@@ -134,6 +139,7 @@ bot.command('pelicula', async (ctx) => {
   }
  });
 });
+
 
 bot.on('callback_query', async (ctx) => {
  const [reaction, movieId] = ctx.callbackQuery.data.split('_');
