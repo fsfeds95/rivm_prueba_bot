@@ -11,7 +11,7 @@ const port = 8225;
 
 // Reemplaza con el ID del usuario permitido
 const ALLOWED_USER_ID = 6839704393;
-const BOT_TOKEN = '7723354766:AAHnCAR7rAHfDG20S8Ip9X23ZpxAM0VA3Q0';
+const BOT_TOKEN = '7723354766:AAHrjbwxDvxZemQ3Joa7RE_5Yjvhq2Hx3vk';
 
 // Conexión a MongoDB
 mongoose.connect('mongodb+srv://alphayomegafilms:ggZsnCHGTEvoDkZF@introcinemaclub.ulfcq.mongodb.net/introCinemaClub?retryWrites=true&w=majority', {});
@@ -55,61 +55,62 @@ bot.command('addmovie', (ctx) => {
 });
 
 bot.on('text', (ctx) => {
- switch (step) {
-  case 0:
-   movieData.titleEsp = ctx.message.text;
+ if (step === 0) {
+  // Si el paso es 0, no hacemos nada, ya que no se ha iniciado el proceso
+  return;
+ }
+
+ if (ctx.from.id !== ALLOWED_USER_ID) {
+  ctx.reply('Lo siento, solo el administrador puede usar este comando.');
+  return;
+ }
+
+ if (step === 1) {
+  movieData.titleEsp = ctx.message.text;
+  step++;
+  ctx.reply('Envia el Título en su idioma original de la película.');
+ } else if (step === 2) {
+  movieData.titleOrg = ctx.message.text;
+  step++;
+  ctx.reply('Envia el Año de estreno (4 números).');
+ } else if (step === 3) {
+  if (/^\d{4}$/.test(ctx.message.text)) {
+   movieData.anio = parseInt(ctx.message.text);
    step++;
-   ctx.reply('Envia el Título en su idioma original de la película.');
-   break;
-  case 1:
-   movieData.titleOrg = ctx.message.text;
+   ctx.reply('Enviame los Géneros en Español (usa #genero).');
+  } else {
+   ctx.reply('Por favor, envía un año válido (4 números).');
+  }
+ } else if (step === 4) {
+  if (ctx.message.text.startsWith('#')) {
+   movieData.genreEsp = ctx.message.text;
    step++;
-   ctx.reply('Envia el Año de estreno (4 números).');
-   break;
-  case 2:
-   if (/^\d{4}$/.test(ctx.message.text)) {
-    movieData.anio = parseInt(ctx.message.text);
-    step++;
-    ctx.reply('Enviame los Géneros en Español (usa #genero).');
-   } else {
-    ctx.reply('Por favor, envía un año válido (4 números).');
-   }
-   break;
-  case 3:
-   if (ctx.message.text.startsWith('#')) {
-    movieData.genreEsp = ctx.message.text;
-    step++;
-    ctx.reply('Enviame la Sinopsis en Español de la película.');
-   } else {
-    ctx.reply('Recuerda usar un hashtag para los géneros, como #acción.');
-   }
-   break;
-  case 4:
-   movieData.sinopsisEsp = ctx.message.text;
-   step++;
-   ctx.reply('Enviame la url de la imagen de la película (POSTER, BACKDROP).');
-   break;
-  case 5:
-   movieData.urlImg = ctx.message.text;
-   step++;
-   ctx.reply('Enviame la url de la película (TERABOX, MEGA, DRIVE).');
-   break;
-  case 6:
-   movieData.urlMovie = ctx.message.text;
-   // Aquí guardamos la película en la base de datos
-   const newMovie = new Movie(movieData);
-   newMovie.save()
-    .then(() => {
-     ctx.reply('¡Película agregada correctamente!');
-     step = 0; // Reinicia el paso
-     movieData = {}; // Limpia los datos
-    })
-    .catch(err => ctx.reply('Error al agregar la película.'));
-   break;
-  default:
-   ctx.reply('¡Ups! Algo salió mal. Usa /addmovie para empezar de nuevo.');
-   step = 0; // Reinicia el paso
-   break;
+   ctx.reply('Enviame la Sinopsis en Español de la película.');
+  } else {
+   ctx.reply('Recuerda usar un hashtag para los géneros, como #acción.');
+  }
+ } else if (step === 5) {
+  movieData.sinopsisEsp = ctx.message.text;
+  step++;
+  ctx.reply('Enviame la url de la imagen de la película (POSTER, BACKDROP).');
+ } else if (step === 6) {
+  movieData.urlImg = ctx.message.text;
+  step++;
+  ctx.reply('Enviame la url de la película (TERABOX, MEGA, DRIVE).');
+ } else if (step === 7) {
+  movieData.urlMovie = ctx.message.text;
+  // Aquí guardamos la película en la base de datos
+  const newMovie = new Movie(movieData);
+  newMovie.save()
+   .then(() => {
+    ctx.reply('¡Película agregada correctamente! 🎉');
+    step = 0; // Reinicia el paso
+    movieData = {}; // Limpia los datos
+   })
+   .catch(err => ctx.reply('Error al agregar la película.'));
+ } else {
+  ctx.reply('¡Ups! Algo salió mal. Usa /addmovie para empezar de nuevo.');
+  step = 0; // Reinicia el paso
  }
 });
 
