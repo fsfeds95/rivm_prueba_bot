@@ -1,21 +1,19 @@
 // Importar las bibliotecas requeridas
+const express = require('express'); // Para crear el servidor web
+const { Telegraf } = require('telegraf');
+const mongoose = require('mongoose');
+const fetch = require('node-fetch'); // Asegúrate de tener esta dependencia
 
-// Para crear el servidor web
-const express = require('express');
 // Crear una aplicación en Express
 const app = express();
 // Puerto donde se ejecutará el servidor
 const port = 8225;
 
-
-const { Telegraf } = require('telegraf');
-const mongoose = require('mongoose');
-
 // Reemplaza con el ID del usuario permitido
-const ALLOWED_USER_ID = 6839704393; 
+const ALLOWED_USER_ID = 6839704393;
 
 // Conexión a MongoDB
-mongoose.connect('mongodb+srv://alphayomegafilms:ggZsnCHGTEvoDkZF@introcinemaclub.ulfcq.mongodb.net/?retryWrites=true&w=majority&appName=introCinemaClub', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb+srv://alphayomegafilms:ggZsnCHGTEvoDkZF@introcinemaclub.ulfcq.mongodb.net/introCinemaClub?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Esquema de la base de datos
 const movieSchema = new mongoose.Schema({
@@ -34,7 +32,6 @@ const movieSchema = new mongoose.Schema({
   noMeGusto: { type: Number, default: 0 }
  }
 });
-
 
 const Movie = mongoose.model('Movie', movieSchema);
 
@@ -119,15 +116,15 @@ bot.command('pelicula_aleatoria', async (ctx) => {
   caption: `${randomMovie.titleEsp}\n${randomMovie.titleOrg}\nAño: ${randomMovie.anio}\nGéneros: ${randomMovie.genreEsp}\nSinopsis: ${randomMovie.sinopsisEsp}`,
   reply_markup: {
    inline_keyboard: [
-    [
+                [
      { text: '❤️ ' + randomMovie.votos.meEncanta, callback_data: 'me_encanta_' + randomMovie._id },
      { text: '👍 ' + randomMovie.votos.buena, callback_data: 'buena_' + randomMovie._id },
      { text: '😐 ' + randomMovie.votos.meh, callback_data: 'meh_' + randomMovie._id },
      { text: '💩 ' + randomMovie.votos.mala, callback_data: 'mala_' + randomMovie._id },
      { text: '💔 ' + randomMovie.votos.noMeGusto, callback_data: 'no_me_gusto_' + randomMovie._id }
-    ],
-    [{ text: 'Ver película', url: randomMovie.urlMovie }],
-    [{ text: 'Canal oficial', url: 'https://t.me/introCinemaClub' }]
+                ],
+                [{ text: 'Ver película', url: randomMovie.urlMovie }],
+                [{ text: 'Canal oficial', url: 'https://t.me/introCinemaClub' }]
             ]
   }
  });
