@@ -11,6 +11,7 @@ const port = 8225;
 
 // Reemplaza con el ID del usuario permitido
 const ALLOWED_USER_ID = 6839704393;
+const BOT_TOKEN = '7723354766:AAHnCAR7rAHfDG20S8Ip9X23ZpxAM0VA3Q0';
 
 // Conexión a MongoDB
 mongoose.connect('mongodb+srv://alphayomegafilms:ggZsnCHGTEvoDkZF@introcinemaclub.ulfcq.mongodb.net/introCinemaClub?retryWrites=true&w=majority', {});
@@ -36,14 +37,14 @@ const movieSchema = new mongoose.Schema({
 const Movie = mongoose.model('Movie', movieSchema);
 
 // Inicializa el bot
-const bot = new Telegraf('7723354766:AAHwRgB6MIdJKT5HFVBle7VJ5oCE8E8SBtA');
+const bot = new Telegraf(BOT_TOKEN);
 
 let step = 0;
 let movieData = {};
 
 bot.start((ctx) => ctx.reply('¡Hola! Soy tu asistente de cine.'));
 
-bot.command('agregar_pelicula', (ctx) => {
+bot.command('addmovie', (ctx) => {
  if (ctx.from.id === ALLOWED_USER_ID) { // Verifica si el usuario es el administrador
   step = 0; // Reinicia el paso
   movieData = {}; // Reinicia los datos
@@ -98,34 +99,37 @@ bot.on('text', (ctx) => {
    // Aquí guardamos la película en la base de datos
    const newMovie = new Movie(movieData);
    newMovie.save()
-    .then(() => ctx.reply('¡Película agregada correctamente! 🎉'))
-    .catch(err => ctx.reply('Error al agregar la película. 😢'));
-   step = 0; // Reinicia el paso
+    .then(() => {
+     ctx.reply('¡Película agregada correctamente!');
+     step = 0; // Reinicia el paso
+     movieData = {}; // Limpia los datos
+    })
+    .catch(err => ctx.reply('Error al agregar la película.'));
    break;
   default:
-   ctx.reply('¡Ups! Algo salió mal. Usa /agregar_pelicula para empezar de nuevo.');
+   ctx.reply('¡Ups! Algo salió mal. Usa /addmovie para empezar de nuevo.');
    step = 0; // Reinicia el paso
    break;
  }
 });
 
-bot.command('pelicula_aleatoria', async (ctx) => {
+bot.command('pelicula', async (ctx) => {
  const movies = await Movie.find();
  const randomMovie = movies[Math.floor(Math.random() * movies.length)];
  ctx.replyWithPhoto(randomMovie.urlImg, {
   caption: `${randomMovie.titleEsp}\n${randomMovie.titleOrg}\nAño: ${randomMovie.anio}\nGéneros: ${randomMovie.genreEsp}\nSinopsis: ${randomMovie.sinopsisEsp}`,
   reply_markup: {
    inline_keyboard: [
-                [
+    [
      { text: '❤️ ' + randomMovie.votos.meEncanta, callback_data: 'me_encanta_' + randomMovie._id },
      { text: '👍 ' + randomMovie.votos.buena, callback_data: 'buena_' + randomMovie._id },
      { text: '😐 ' + randomMovie.votos.meh, callback_data: 'meh_' + randomMovie._id },
      { text: '💩 ' + randomMovie.votos.mala, callback_data: 'mala_' + randomMovie._id },
      { text: '💔 ' + randomMovie.votos.noMeGusto, callback_data: 'no_me_gusto_' + randomMovie._id }
-                ],
-                [{ text: 'Ver película', url: randomMovie.urlMovie }],
-                [{ text: 'Canal oficial', url: 'https://t.me/introCinemaClub' }]
-            ]
+    ],
+    [{ text: 'Ver película', url: randomMovie.urlMovie }],
+    [{ text: 'Canal oficial', url: 'https://t.me/introCinemaClub' }]
+   ]
   }
  });
 });
@@ -153,7 +157,7 @@ bot.on('callback_query', async (ctx) => {
  }
 
  await movie.save();
- ctx.answerCbQuery('Gracias por reaccionar.');
+ ctx.answerCbQuery('¡Gracias por reaccionar!');
 });
 
 bot.launch(); // Inicia el bot
