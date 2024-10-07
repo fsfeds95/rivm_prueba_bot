@@ -115,31 +115,35 @@ bot.on('text', (ctx) => {
 });
 
 bot.command('movie', async (ctx) => {
- const movies = await Movie.find();
- if (movies.length === 0) {
-  ctx.reply('¡Ups! No se ha encontrado ninguna película.');
-  return;
- }
-
- const randomMovie = movies[Math.floor(Math.random() * movies.length)];
- ctx.replyWithPhoto(randomMovie.urlImg, {
-  caption: `${randomMovie.titleEsp}\n${randomMovie.titleOrg}\nAño: ${randomMovie.anio}\nGéneros: ${randomMovie.genreEsp}\nSinopsis: ${randomMovie.sinopsisEsp}`,
-  reply_markup: {
-   inline_keyboard: [
-    [
-     { text: '❤️ ' + randomMovie.votos.meEncanta, callback_data: 'me_encanta_' + randomMovie._id },
-     { text: '👍 ' + randomMovie.votos.buena, callback_data: 'buena_' + randomMovie._id },
-     { text: '😐 ' + randomMovie.votos.meh, callback_data: 'meh_' + randomMovie._id },
-     { text: '💩 ' + randomMovie.votos.mala, callback_data: 'mala_' + randomMovie._id },
-     { text: '💔 ' + randomMovie.votos.noMeGusto, callback_data: 'no_me_gusto_' + randomMovie._id }
-    ],
-    [{ text: 'Ver película', url: randomMovie.urlMovie }],
-    [{ text: 'Canal oficial', url: 'https://t.me/introCinemaClub' }]
-   ]
+ try {
+  const movies = await Movie.find(); // Asegúrate de que 'Movie' es tu modelo
+  if (movies.length === 0) {
+   ctx.reply('¡Ups! No se ha encontrado ninguna película.');
+   return;
   }
- });
-});
 
+  const randomMovie = movies[Math.floor(Math.random() * movies.length)];
+  ctx.replyWithPhoto(randomMovie.urlImg, {
+   caption: `${randomMovie.titleEsp}\n${randomMovie.titleOrg}\nAño: ${randomMovie.anio}\nGéneros: ${randomMovie.genreEsp}\nSinopsis: ${randomMovie.sinopsisEsp}`,
+   reply_markup: {
+    inline_keyboard: [
+                    [
+      { text: '❤️ ' + randomMovie.votos.meEncanta, callback_data: 'me_encanta_' + randomMovie._id },
+      { text: '👍 ' + randomMovie.votos.buena, callback_data: 'buena_' + randomMovie._id },
+      { text: '😐 ' + randomMovie.votos.meh, callback_data: 'meh_' + randomMovie._id },
+      { text: '💩 ' + randomMovie.votos.mala, callback_data: 'mala_' + randomMovie._id },
+      { text: '💔 ' + randomMovie.votos.noMeGusto, callback_data: 'no_me_gusto_' + randomMovie._id }
+                    ],
+                    [{ text: 'Ver película', url: randomMovie.urlMovie }],
+                    [{ text: 'Canal oficial', url: 'https://t.me/introCinemaClub' }]
+                ]
+   }
+  });
+ } catch (error) {
+  ctx.reply('¡Ups! Ocurrió un error al acceder a la base de datos. 😢');
+  console.error(error);
+ }
+});
 
 bot.on('callback_query', async (ctx) => {
  const [reaction, movieId] = ctx.callbackQuery.data.split('_');
