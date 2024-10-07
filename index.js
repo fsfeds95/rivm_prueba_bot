@@ -1,192 +1,170 @@
 // Importar las bibliotecas requeridas
+
+// Para crear el servidor web
 const express = require('express');
-// Crea una aplicación en Express
+// Crear una aplicación en Express
 const app = express();
+// Puerto donde se ejecutará el servidor
 const port = 8225;
 
-// Importar las dependencias necesarias
+
 const { Telegraf } = require('telegraf');
-const request = require('request');
-const xml2js = require('xml2js');
+const mongoose = require('mongoose');
 
-const BOT_TOKEN = '7723354766:AAFlbfzZWUnQ7rAed69_yF0g2U-g2bMjAmg';
+// Reemplaza con el ID del usuario permitido
+const ALLOWED_USER_ID = 6839704393; 
 
-const bot = new Telegraf(BOT_TOKEN);
+// Conexión a MongoDB
+mongoose.connect('mongodb+srv://alphayomegafilms:ggZsnCHGTEvoDkZF@introcinemaclub.ulfcq.mongodb.net/?retryWrites=true&w=majority&appName=introCinemaClub', { useNewUrlParser: true, useUnifiedTopology: true });
 
-const RSS_cine = 'https://www.cinemascomics.com/cine/feed/';
-const RSS_serie = 'https://www.cinemascomics.com/series-de-television/feed/';
+// Esquema de la base de datos
+const movieSchema = new mongoose.Schema({
+ titleEsp: { type: String, required: true },
+ titleOrg: { type: String, required: true },
+ anio: { type: Number, required: true },
+ genreEsp: { type: String, required: true },
+ sinopsisEsp: { type: String, required: true },
+ urlImg: { type: String, required: true },
+ urlMovie: { type: String, required: true },
+ votos: {
+  meEncanta: { type: Number, default: 0 },
+  buena: { type: Number, default: 0 },
+  meh: { type: Number, default: 0 },
+  mala: { type: Number, default: 0 },
+  noMeGusto: { type: Number, default: 0 }
+ }
+});
 
-const extractImage = (content) => {
- const match = content.match(/<img[^>]+src="([^">]+)"/);
- return match ? match[1] : null; // Retorna la URL de la primera imagen
-};
 
-const isValidImageUrl = (url, callback) => {
- request.head(url, (err, res) => {
-  if (!err && res.statusCode === 200) {
-   callback(true);
-  } else {
-   callback(false);
+const Movie = mongoose.model('Movie', movieSchema);
+
+// Inicializa el bot
+const bot = new Telegraf('7723354766:AAHwRgB6MIdJKT5HFVBle7VJ5oCE8E8SBtA');
+
+let step = 0;
+let movieData = {};
+
+bot.start((ctx) => ctx.reply('¡Hola! Soy tu asistente de cine.'));
+
+bot.command('agregar_pelicula', (ctx) => {
+ if (ctx.from.id === ALLOWED_USER_ID) { // Verifica si el usuario es el administrador
+  step = 0; // Reinicia el paso
+  movieData = {}; // Reinicia los datos
+  ctx.reply('Envia el Título de la película en español.');
+ } else {
+  ctx.reply('Lo siento, solo el administrador puede usar este comando. 😘');
+ }
+});
+
+bot.on('text', (ctx) => {
+ switch (step) {
+  case 0:
+   movieData.titleEsp = ctx.message.text;
+   step++;
+   ctx.reply('Envia el Título en su idioma original de la película.');
+   break;
+  case 1:
+   movieData.titleOrg = ctx.message.text;
+   step++;
+   ctx.reply('Envia el Año de estreno (4 números).');
+   break;
+  case 2:
+   if (/^\d{4}$/.test(ctx.message.text)) {
+    movieData.anio = parseInt(ctx.message.text);
+    step++;
+    ctx.reply('Enviame los Géneros en Español (usa #genero).');
+   } else {
+    ctx.reply('Por favor, envía un año válido (4 números).');
+   }
+   break;
+  case 3:
+   if (ctx.message.text.startsWith('#')) {
+    movieData.genreEsp = ctx.message.text;
+    step++;
+    ctx.reply('Enviame la Sinopsis en Español de la película.');
+   } else {
+    ctx.reply('Recuerda usar un hashtag para los géneros, como #acción.');
+   }
+   break;
+  case 4:
+   movieData.sinopsisEsp = ctx.message.text;
+   step++;
+   ctx.reply('Enviame la url de la imagen de la película (POSTER, BACKDROP).');
+   break;
+  case 5:
+   movieData.urlImg = ctx.message.text;
+   step++;
+   ctx.reply('Enviame la url de la película (TERABOX, MEGA, DRIVE).');
+   break;
+  case 6:
+   movieData.urlMovie = ctx.message.text;
+   // Aquí guardamos la película en la base de datos
+   const newMovie = new Movie(movieData);
+   newMovie.save()
+    .then(() => ctx.reply('¡Película agregada correctamente! 🎉'))
+    .catch(err => ctx.reply('Error al agregar la película. 😢'));
+   step = 0; // Reinicia el paso
+   break;
+  default:
+   ctx.reply('¡Ups! Algo salió mal. Usa /agregar_pelicula para empezar de nuevo.');
+   step = 0; // Reinicia el paso
+   break;
+ }
+});
+
+bot.command('pelicula_aleatoria', async (ctx) => {
+ const movies = await Movie.find();
+ const randomMovie = movies[Math.floor(Math.random() * movies.length)];
+ ctx.replyWithPhoto(randomMovie.urlImg, {
+  caption: `${randomMovie.titleEsp}\n${randomMovie.titleOrg}\nAño: ${randomMovie.anio}\nGéneros: ${randomMovie.genreEsp}\nSinopsis: ${randomMovie.sinopsisEsp}`,
+  reply_markup: {
+   inline_keyboard: [
+    [
+     { text: '❤️ ' + randomMovie.votos.meEncanta, callback_data: 'me_encanta_' + randomMovie._id },
+     { text: '👍 ' + randomMovie.votos.buena, callback_data: 'buena_' + randomMovie._id },
+     { text: '😐 ' + randomMovie.votos.meh, callback_data: 'meh_' + randomMovie._id },
+     { text: '💩 ' + randomMovie.votos.mala, callback_data: 'mala_' + randomMovie._id },
+     { text: '💔 ' + randomMovie.votos.noMeGusto, callback_data: 'no_me_gusto_' + randomMovie._id }
+    ],
+    [{ text: 'Ver película', url: randomMovie.urlMovie }],
+    [{ text: 'Canal oficial', url: 'https://t.me/introCinemaClub' }]
+            ]
   }
  });
-};
+});
 
-const fetchCine = (ctx = null) => {
- request(RSS_cine, (error, response, body) => {
-  if (!error && response.statusCode === 200) {
-   xml2js.parseString(body, (err, result) => {
-    if (!err) {
-     const items = result.rss.channel[0].item;
-     const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 3); // Artículos aleatorios
+bot.on('callback_query', async (ctx) => {
+ const [reaction, movieId] = ctx.callbackQuery.data.split('_');
+ const movie = await Movie.findById(movieId);
 
-     if (ctx) {
-      randomArticles.forEach(item => {
-       const title = item.title[0];
-       const link = item.link[0];
-       const description = item.description[0];
-       const content = item['content:encoded'][0];
-       const imageUrl = extractImage(content); // Obtener la imagen
-       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
+ switch (reaction) {
+  case 'me_encanta':
+   movie.votos.meEncanta++;
+   break;
+  case 'buena':
+   movie.votos.buena++;
+   break;
+  case 'meh':
+   movie.votos.meh++;
+   break;
+  case 'mala':
+   movie.votos.mala++;
+   break;
+  case 'no_me_gusto':
+   movie.votos.noMeGusto++;
+   break;
+ }
 
-       // Obtener categorías como texto plano
-       const categoriesText = item.category ? item.category : [];
-       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
-       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
+ await movie.save();
+ ctx.answerCbQuery('Gracias por tu reacción! ❤️');
+});
 
-       // Crear un conjunto de hashtags únicos
-       const uniqueHashtags = new Set(hashtags);
+bot.launch(); // Inicia el bot
 
-       // Comparar y eliminar los que ya están en hashtags
-       hashtagCat.split(' ').forEach(cat => {
-        if (cat) {
-         uniqueHashtags.delete(cat); // Elimina si ya existe
-        }
-       });
-
-       // Unir los hashtags únicos de nuevo en una cadena
-       const finalHashtags = Array.from(uniqueHashtags).join(' ');
-
-       const message = `
-⟨📰⟩ #Noticia
-▬▬▬▬▬▬▬▬▬
-⟨🍿⟩ ${title}
-▬▬▬▬▬▬▬▬▬
-⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
-▬▬▬▬▬▬▬▬▬
-${finalHashtags}
-▬▬▬▬▬▬▬▬▬
-`;
-
-       // Verificar si la URL de la imagen es válida
-       isValidImageUrl(imageUrl, (isValid) => {
-        if (isValid) {
-         // Crear un botón para el enlace
-         const button = [{ text: '⟨🗞️⟩ Leer más ⟨🗞️⟩', url: link }];
-         ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
-          .catch(err => console.error('Error al enviar el mensaje:', err));
-        } else {
-         console.error('URL de imagen no válida:', imageUrl);
-        }
-       });
-      });
-     }
-    } else {
-     console.error('Error al parsear el RSS:', err);
-    }
-   });
-  } else {
-   console.error('Error al obtener el RSS:', error);
-  }
- });
-};
-
-const fetchSerie = (ctx = null) => {
- request(RSS_serie, (error, response, body) => {
-  if (!error && response.statusCode === 200) {
-   xml2js.parseString(body, (err, result) => {
-    if (!err) {
-     const items = result.rss.channel[0].item;
-     const randomArticles = items.sort(() => 0.5 - Math.random()).slice(0, 3); // Artículos aleatorios
-
-     if (ctx) {
-      randomArticles.forEach(item => {
-       const title = item.title[0];
-       const link = item.link[0];
-       const description = item.description[0];
-       const content = item['content:encoded'][0];
-       const imageUrl = extractImage(content); // Obtener la imagen
-       const hashtags = ['#Cine', '#Noticias', '#Películas', '#Estrenos', '#Cultura', '#Entretenimiento'];
-
-       // Obtener categorías como texto plano
-       const categoriesText = item.category ? item.category : [];
-       const catReplace = categoriesText.join(' ').replace(/\s/g, '_'); // Reemplaza espacios por guiones bajos
-       const hashtagCat = `#` + catReplace.split('_').join(' #'); // Agrega el símbolo de hashtag
-
-       // Crear un conjunto de hashtags únicos
-       const uniqueHashtags = new Set(hashtags);
-
-       // Comparar y eliminar los que ya están en hashtags
-       hashtagCat.split(' ').forEach(cat => {
-        if (cat) {
-         uniqueHashtags.delete(cat); // Elimina si ya existe
-        }
-       });
-
-       // Unir los hashtags únicos de nuevo en una cadena
-       const finalHashtags = Array.from(uniqueHashtags).join(' ');
-
-       const message = `
-⟨📰⟩ #Noticia
-▬▬▬▬▬▬▬▬▬
-⟨🍿⟩ ${title}
-▬▬▬▬▬▬▬▬▬
-⟨💭⟩ Resumen: ${description.substring(0, 1500)}...
-▬▬▬▬▬▬▬▬▬
-${finalHashtags}
-▬▬▬▬▬▬▬▬▬
-`;
-
-       // Verificar si la URL de la imagen es válida
-       isValidImageUrl(imageUrl, (isValid) => {
-        if (isValid) {
-         // Crear un botón para el enlace
-         const button = [{ text: '⟨🗞️⟩ Leer más ⟨🗞️⟩', url: link }];
-         ctx.replyWithPhoto(imageUrl, { caption: message, reply_markup: { inline_keyboard: [button] } })
-          .catch(err => console.error('Error al enviar el mensaje:', err));
-        } else {
-         console.error('URL de imagen no válida:', imageUrl);
-        }
-       });
-      });
-     }
-    } else {
-     console.error('Error al parsear el RSS:', err);
-    }
-   });
-  } else {
-   console.error('Error al obtener el RSS:', error);
-  }
- });
-};
-
-bot.start((ctx) => ctx.reply('¡Hola! Estoy aquí para traerte artículos de cine y series.\n\nPuedes usar el comando /cine para obtener 3 artículos de cine aleatorias.\n\nPuedes usar el comando /serie para obtener 3 artículos de series aleatorias'));
-
-// Enviar artículos aleatorios
-bot.command('cine', (ctx) => fetchCine(ctx));
-
-// Enviar artículos aleatorios
-bot.command('serie', (ctx) => fetchSerie(ctx));
-
-// Mantiene el bot vivo y envía solo el último artículo
-setInterval(() => fetchCine(), 60000);
-
-// Mantiene el bot vivo y envía solo el último artículo
-setInterval(() => fetchSerie(), 60000);
-
-bot.launch();
-
-// Ruta "/ping"
+// Ruta "/ping" para verificar que el servidor está funcionando
 app.get('/ping', (req, res) => {
+ const currentDate = new Date().toLocaleString("es-VE", { timeZone: "America/Caracas" });
+ console.log(`Sigo vivo 🎉 (${currentDate})`);
  res.send('');
 });
 
@@ -194,7 +172,7 @@ app.get('/ping', (req, res) => {
 app.listen(port, () => {
  console.log(`Servidor iniciado en http://localhost:${port}`);
 
- // Código del cliente para mantener la conexión activa
+ // Mantiene la conexión activa
  setInterval(() => {
   fetch(`http://localhost:${port}/ping`)
    .then(response => {
@@ -204,5 +182,5 @@ app.listen(port, () => {
    .catch(error => {
     console.error('Error en la solicitud de ping:', error);
    });
- }, 5 * 60 * 1000); // 5 m * 60 s * 1000 ms
+ }, 5 * 60 * 1000); // Cada 5 minutos
 });
