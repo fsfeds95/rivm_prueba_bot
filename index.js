@@ -13,7 +13,7 @@ const port = 8225;
 const ALLOWED_USER_ID = 6839704393;
 
 // Conexión a MongoDB
-mongoose.connect('mongodb+srv://alphayomegafilms:ggZsnCHGTEvoDkZF@introcinemaclub.ulfcq.mongodb.net/introCinemaClub?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb+srv://alphayomegafilms:ggZsnCHGTEvoDkZF@introcinemaclub.ulfcq.mongodb.net/introCinemaClub?retryWrites=true&w=majority', {});
 
 // Esquema de la base de datos
 const movieSchema = new mongoose.Schema({
